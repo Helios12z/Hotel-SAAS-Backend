@@ -14,8 +14,15 @@ namespace Hotel_SAAS_Backend.API.Data
             // Check if data already exists
             if (await context.Users.AnyAsync())
             {
+                // Seed subscription plans if not exists
+                await SeedSubscriptionPlansAsync(context);
                 return; // Database has been seeded
             }
+
+            // ============================================
+            // 0. SEED SUBSCRIPTION PLANS
+            // ============================================
+            await SeedSubscriptionPlansAsync(context);
 
             // ============================================
             // 1. SEED USERS
@@ -328,11 +335,11 @@ namespace Hotel_SAAS_Backend.API.Data
                 new() { HotelId = nyHotel.Id, AmenityId = amenities.First(a => a.Name == "Restaurant").Id, AdditionalCost = 0 },
                 new() { HotelId = nyHotel.Id, AmenityId = amenities.First(a => a.Name == "Bar/Lounge").Id, AdditionalCost = 0 },
                 new() { HotelId = nyHotel.Id, AmenityId = amenities.First(a => a.Name == "Business Center").Id, AdditionalCost = 0 },
-                new() { HotelId = nyHotel.Id, AmenityId = amenities.First(a => a.Name == "Meeting Rooms").Id, AdditionalCost = 75 },
+                new() { HotelId = nyHotel.Id, AmenityId = amenities.First(a => a.Name == "Meeting Rooms").Id, AdditionalCost = 1875000m }, // 1,875,000 VND
                 new() { HotelId = nyHotel.Id, AmenityId = amenities.First(a => a.Name == "Room Service").Id, AdditionalCost = 0 },
                 new() { HotelId = nyHotel.Id, AmenityId = amenities.First(a => a.Name == "Concierge").Id, AdditionalCost = 0 },
                 new() { HotelId = nyHotel.Id, AmenityId = amenities.First(a => a.Name == "Airport Shuttle").Id, AdditionalCost = 0 },
-                new() { HotelId = nyHotel.Id, AmenityId = amenities.First(a => a.Name == "Laundry Service").Id, AdditionalCost = 25 }
+                new() { HotelId = nyHotel.Id, AmenityId = amenities.First(a => a.Name == "Laundry Service").Id, AdditionalCost = 625000m } // 625,000 VND
             };
             await context.HotelAmenities.AddRangeAsync(nyHotelAmenities);
 
@@ -357,9 +364,9 @@ namespace Hotel_SAAS_Backend.API.Data
                     NumberOfBeds = 1,
                     MaxOccupancy = 2,
                     SizeInSquareMeters = 28,
-                    BasePrice = 299,
-                    WeekendPrice = 349,
-                    HolidayPrice = 399,
+                    BasePrice = 1500000m, // 1,500,000 VND
+                    WeekendPrice = 1800000m, // 1,800,000 VND
+                    HolidayPrice = 2200000m, // 2,200,000 VND
                     Status = RoomStatus.Available,
                     Description = "Comfortable standard room with queen bed, city views, and modern amenities.",
                     HasView = true,
@@ -389,9 +396,9 @@ namespace Hotel_SAAS_Backend.API.Data
                     NumberOfBeds = 1,
                     MaxOccupancy = 2,
                     SizeInSquareMeters = 38,
-                    BasePrice = 449,
-                    WeekendPrice = 499,
-                    HolidayPrice = 599,
+                    BasePrice = 2500000m, // 2,500,000 VND
+                    WeekendPrice = 3000000m, // 3,000,000 VND
+                    HolidayPrice = 3800000m, // 3,800,000 VND
                     Status = RoomStatus.Available,
                     Description = "Spacious deluxe room with king bed, sitting area, and premium amenities.",
                     HasView = true,
@@ -421,9 +428,9 @@ namespace Hotel_SAAS_Backend.API.Data
                     NumberOfBeds = 1,
                     MaxOccupancy = 3,
                     SizeInSquareMeters = 55,
-                    BasePrice = 699,
-                    WeekendPrice = 799,
-                    HolidayPrice = 999,
+                    BasePrice = 4500000m, // 4,500,000 VND
+                    WeekendPrice = 5500000m, // 5,500,000 VND
+                    HolidayPrice = 7000000m, // 7,000,000 VND
                     Status = RoomStatus.Available,
                     Description = "Luxury suite with separate living room, king bedroom, premium amenities, and stunning views.",
                     HasView = true,
@@ -550,17 +557,17 @@ namespace Hotel_SAAS_Backend.API.Data
                 CheckOutDate = checkOut,
                 NumberOfGuests = 2,
                 NumberOfRooms = 1,
-                Subtotal = 1347,
-                TaxAmount = 134.70m,
-                ServiceFee = 67.35m,
+                Subtotal = 13470000m,
+                TaxAmount = 1347000m,
+                ServiceFee = 673500m,
                 DiscountAmount = 0,
-                TotalAmount = 1549.05m,
-                Currency = "USD",
+                TotalAmount = 15490500m,
+                Currency = "VND",
                 Status = BookingStatus.Confirmed,
                 GuestName = "Jane Doe",
                 GuestEmail = "guest@example.com",
                 GuestPhoneNumber = "+1-555-0101",
-                PaymentMethod = "Credit Card",
+                PaymentMethod = "BankTransfer",
                 IsPaid = true,
                 BookedAt = DateTime.UtcNow.AddDays(-5),
                 ConfirmedAt = DateTime.UtcNow.AddDays(-4),
@@ -576,7 +583,7 @@ namespace Hotel_SAAS_Backend.API.Data
             {
                 BookingId = booking.Id,
                 RoomId = bookedRoom.Id,
-                Price = 449,
+                Price = 4490000m,
                 NumberOfAdults = 2,
                 NumberOfChildren = 0,
                 NumberOfInfants = 0
@@ -618,19 +625,121 @@ namespace Hotel_SAAS_Backend.API.Data
                 Id = Guid.NewGuid(),
                 BookingId = booking.Id,
                 TransactionId = "TXN" + DateTime.UtcNow.Ticks,
-                Amount = 1549.05m,
-                Currency = "USD",
-                Method = PaymentMethod.CreditCard,
+                Amount = 15490500m,
+                Currency = "VND",
+                Method = PaymentMethod.BankTransfer,
                 Status = PaymentStatus.Completed,
                 ProcessedAt = DateTime.UtcNow.AddDays(-4),
-                Gateway = "Stripe",
-                CardLast4Digits = "4242",
+                Gateway = "VNPay",
+                CardLast4Digits = null,
                 CreatedAt = DateTime.UtcNow.AddDays(-4),
                 UpdatedAt = DateTime.UtcNow.AddDays(-4)
             };
             await context.Payments.AddAsync(payment);
 
             // Save all changes
+            await context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Seed default subscription plans
+        /// </summary>
+        private static async Task SeedSubscriptionPlansAsync(ApplicationDbContext context)
+        {
+            if (await context.SubscriptionPlans.AnyAsync())
+            {
+                return; // Plans already seeded
+            }
+
+            var plans = new List<SubscriptionPlan>
+            {
+                new()
+                {
+                    Id = Guid.Parse("11111111-0000-0000-0000-000000000001"),
+                    Name = "Basic",
+                    Description = "Hoàn hảo cho các khách sạn nhỏ độc lập mới bắt đầu sử dụng nền tảng.",
+                    PlanType = SubscriptionPlanType.Basic,
+                    MonthlyPrice = 725000m, // 725,000 VND (~$29)
+                    QuarterlyPrice = 1975000m, // 1,975,000 VND (~$79) - 10% discount
+                    YearlyPrice = 7250000m, // 7,250,000 VND (~$290) - 20% discount
+                    Currency = "VND",
+                    MaxHotels = 1,
+                    MaxRoomsPerHotel = 20,
+                    MaxUsersPerHotel = 3,
+                    CommissionRate = 15,
+                    HasAnalytics = true,
+                    HasAdvancedReporting = false,
+                    HasApiAccess = false,
+                    HasPrioritySupport = false,
+                    HasChannelManager = false,
+                    HasRevenueManagement = false,
+                    HasMultiLanguage = false,
+                    HasCustomBranding = false,
+                    HasDedicatedAccountManager = false,
+                    TrialDays = 14,
+                    IsActive = true,
+                    IsPopular = false,
+                    SortOrder = 1
+                },
+                new()
+                {
+                    Id = Guid.Parse("11111111-0000-0000-0000-000000000002"),
+                    Name = "Professional",
+                    Description = "Lý tưởng cho các khách sạn đang phát triển cần nhiều tính năng hơn và mức hoa hồng tốt hơn.",
+                    PlanType = SubscriptionPlanType.Standard,
+                    MonthlyPrice = 1975000m, // 1,975,000 VND (~$79)
+                    QuarterlyPrice = 4975000m, // 4,975,000 VND (~$199) - 10% discount
+                    YearlyPrice = 19750000m, // 19,750,000 VND (~$790) - 20% discount
+                    Currency = "VND",
+                    MaxHotels = 3,
+                    MaxRoomsPerHotel = 100,
+                    MaxUsersPerHotel = 10,
+                    CommissionRate = 12,
+                    HasAnalytics = true,
+                    HasAdvancedReporting = true,
+                    HasApiAccess = true,
+                    HasPrioritySupport = true,
+                    HasChannelManager = true,
+                    HasRevenueManagement = false,
+                    HasMultiLanguage = true,
+                    HasCustomBranding = false,
+                    HasDedicatedAccountManager = false,
+                    TrialDays = 14,
+                    IsActive = true,
+                    IsPopular = true, // Most popular plan
+                    SortOrder = 2
+                },
+                new()
+                {
+                    Id = Guid.Parse("11111111-0000-0000-0000-000000000003"),
+                    Name = "Premium",
+                    Description = "Dành cho các khách sạn lớn cần tính năng nâng cao và mức hoa hồng thấp nhất.",
+                    PlanType = SubscriptionPlanType.Premium,
+                    MonthlyPrice = 4975000m, // 4,975,000 VND (~$199)
+                    QuarterlyPrice = 12475000m, // 12,475,000 VND (~$499) - 10% discount
+                    YearlyPrice = 49750000m, // 49,750,000 VND (~$1,990) - 20% discount
+                    Currency = "VND",
+                    MaxHotels = 999,
+                    MaxRoomsPerHotel = 999,
+                    MaxUsersPerHotel = 999,
+                    CommissionRate = 8,
+                    HasAnalytics = true,
+                    HasAdvancedReporting = true,
+                    HasApiAccess = true,
+                    HasPrioritySupport = true,
+                    HasChannelManager = true,
+                    HasRevenueManagement = true,
+                    HasMultiLanguage = true,
+                    HasCustomBranding = true,
+                    HasDedicatedAccountManager = true,
+                    TrialDays = 30,
+                    IsActive = true,
+                    IsPopular = false,
+                    SortOrder = 3
+                }
+            };
+
+            await context.SubscriptionPlans.AddRangeAsync(plans);
             await context.SaveChangesAsync();
         }
 

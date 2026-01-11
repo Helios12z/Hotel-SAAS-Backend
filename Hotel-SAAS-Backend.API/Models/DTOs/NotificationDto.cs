@@ -15,6 +15,17 @@ namespace Hotel_SAAS_Backend.API.Models.DTOs
         public Guid? PromotionId { get; set; }
     }
 
+    public class CreateNotificationDto
+    {
+        public Guid UserId { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public NotificationType Type { get; set; } = NotificationType.SystemAlert;
+        public string? ActionUrl { get; set; }
+        public Guid? BookingId { get; set; }
+        public Guid? PromotionId { get; set; }
+    }
+
     public class MarkNotificationsReadDto
     {
         public List<Guid> NotificationIds { get; set; } = new();

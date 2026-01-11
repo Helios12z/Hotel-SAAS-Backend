@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Solution Items/">
     <File Path="AGENT.MD" />
+    <File Path="docs/IMPLEMENTATION_PLAN.md" />
   </Folder>
   <Project Path="Hotel-SAAS-Backend.API/Hotel-SAAS-Backend.API.csproj" />
 </Solution>

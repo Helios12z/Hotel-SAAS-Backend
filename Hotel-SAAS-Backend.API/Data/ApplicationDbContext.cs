@@ -63,6 +63,15 @@ namespace Hotel_SAAS_Backend.API.Data
         // Guest Profile
         public DbSet<RecentlyViewedHotel> RecentlyViewedHotels { get; set; }
 
+        // Subscriptions
+        public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
+        public DbSet<Subscription> Subscriptions { get; set; }
+        public DbSet<SubscriptionInvoice> SubscriptionInvoices { get; set; }
+
+        // Hotel Onboarding
+        public DbSet<HotelOnboarding> HotelOnboardings { get; set; }
+        public DbSet<OnboardingDocument> OnboardingDocuments { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -602,6 +611,149 @@ namespace Hotel_SAAS_Backend.API.Data
                     .WithMany()
                     .HasForeignKey(e => e.HotelId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // SubscriptionPlan Configuration
+            modelBuilder.Entity<SubscriptionPlan>(entity =>
+            {
+                entity.ToTable("subscription_plans");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.MonthlyPrice).HasPrecision(18, 2);
+                entity.Property(e => e.QuarterlyPrice).HasPrecision(18, 2);
+                entity.Property(e => e.YearlyPrice).HasPrecision(18, 2);
+                entity.Property(e => e.CommissionRate).HasPrecision(5, 2);
+                entity.Property(e => e.Currency).HasMaxLength(10);
+                entity.HasIndex(e => e.PlanType);
+                entity.HasIndex(e => e.IsActive);
+            });
+
+            // Subscription Configuration
+            modelBuilder.Entity<Subscription>(entity =>
+            {
+                entity.ToTable("subscriptions");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Price).HasPrecision(18, 2);
+                entity.Property(e => e.DiscountPercentage).HasPrecision(5, 2);
+                entity.Property(e => e.Currency).HasMaxLength(10);
+                entity.Property(e => e.CancellationReason).HasMaxLength(1000);
+                entity.HasIndex(e => e.BrandId);
+                entity.HasIndex(e => e.PlanId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.EndDate);
+
+                entity.HasOne(e => e.Brand)
+                    .WithMany()
+                    .HasForeignKey(e => e.BrandId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Plan)
+                    .WithMany(p => p.Subscriptions)
+                    .HasForeignKey(e => e.PlanId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // SubscriptionInvoice Configuration
+            modelBuilder.Entity<SubscriptionInvoice>(entity =>
+            {
+                entity.ToTable("subscription_invoices");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.InvoiceNumber).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Subtotal).HasPrecision(18, 2);
+                entity.Property(e => e.TaxAmount).HasPrecision(18, 2);
+                entity.Property(e => e.DiscountAmount).HasPrecision(18, 2);
+                entity.Property(e => e.TotalAmount).HasPrecision(18, 2);
+                entity.Property(e => e.Currency).HasMaxLength(10);
+                entity.Property(e => e.TransactionId).HasMaxLength(100);
+                entity.Property(e => e.InvoicePdfUrl).HasMaxLength(1000);
+                entity.HasIndex(e => e.InvoiceNumber).IsUnique();
+                entity.HasIndex(e => e.SubscriptionId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.DueDate);
+
+                entity.HasOne(e => e.Subscription)
+                    .WithMany(s => s.Invoices)
+                    .HasForeignKey(e => e.SubscriptionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // HotelOnboarding Configuration
+            modelBuilder.Entity<HotelOnboarding>(entity =>
+            {
+                entity.ToTable("hotel_onboardings");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.BrandName).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.HotelName).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Address).IsRequired().HasMaxLength(500);
+                entity.Property(e => e.City).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Country).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.ContactName).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.ContactEmail).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.ContactPhone).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.LegalBusinessName).IsRequired().HasMaxLength(300);
+                entity.Property(e => e.TaxId).HasMaxLength(100);
+                entity.Property(e => e.BusinessRegistrationNumber).HasMaxLength(100);
+                entity.Property(e => e.BankName).HasMaxLength(200);
+                entity.Property(e => e.BankAccountName).HasMaxLength(200);
+                entity.Property(e => e.BankAccountNumber).HasMaxLength(100);
+                entity.Property(e => e.BankRoutingNumber).HasMaxLength(100);
+                entity.Property(e => e.BankSwiftCode).HasMaxLength(50);
+                entity.Property(e => e.IpAddress).HasMaxLength(50);
+                entity.HasIndex(e => e.ApplicantId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.SubmittedAt);
+                entity.HasIndex(e => e.Country);
+                entity.HasIndex(e => e.City);
+
+                entity.HasOne(e => e.Applicant)
+                    .WithMany()
+                    .HasForeignKey(e => e.ApplicantId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.ExistingBrand)
+                    .WithMany()
+                    .HasForeignKey(e => e.ExistingBrandId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.SelectedPlan)
+                    .WithMany()
+                    .HasForeignKey(e => e.SelectedPlanId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.ReviewedBy)
+                    .WithMany()
+                    .HasForeignKey(e => e.ReviewedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.ApprovedBy)
+                    .WithMany()
+                    .HasForeignKey(e => e.ApprovedById)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // OnboardingDocument Configuration
+            modelBuilder.Entity<OnboardingDocument>(entity =>
+            {
+                entity.ToTable("onboarding_documents");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.FileName).IsRequired().HasMaxLength(500);
+                entity.Property(e => e.FileUrl).IsRequired().HasMaxLength(1000);
+                entity.Property(e => e.FileType).HasMaxLength(100);
+                entity.Property(e => e.ReviewNotes).HasMaxLength(1000);
+                entity.Property(e => e.RejectionReason).HasMaxLength(500);
+                entity.HasIndex(e => e.OnboardingId);
+                entity.HasIndex(e => e.Type);
+                entity.HasIndex(e => e.Status);
+
+                entity.HasOne(e => e.Onboarding)
+                    .WithMany(o => o.Documents)
+                    .HasForeignKey(e => e.OnboardingId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.ReviewedBy)
+                    .WithMany()
+                    .HasForeignKey(e => e.ReviewedById)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
         }
     }

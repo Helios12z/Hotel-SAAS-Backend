@@ -88,6 +88,9 @@ builder.Services.AddCors(options =>
 // Email Configuration
 builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
 
+// Stripe Configuration
+builder.Services.Configure<StripeOptions>(builder.Configuration.GetSection("Stripe"));
+
 // Repository Registration
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
@@ -101,6 +104,11 @@ builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
 builder.Services.AddScoped<IWishlistRepository, WishlistRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IRecentlyViewedRepository, RecentlyViewedRepository>();
+builder.Services.AddScoped<ISubscriptionPlanRepository, SubscriptionPlanRepository>();
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<ISubscriptionInvoiceRepository, SubscriptionInvoiceRepository>();
+builder.Services.AddScoped<IHotelOnboardingRepository, HotelOnboardingRepository>();
+builder.Services.AddScoped<IOnboardingDocumentRepository, OnboardingDocumentRepository>();
 
 // Unit of Work Registration
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -114,6 +122,7 @@ builder.Services.AddScoped<IHotelService, HotelService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IStripeService, StripeService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IAmenityService, AmenityService>();
 builder.Services.AddScoped<IPromotionService, PromotionService>();
@@ -122,6 +131,9 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IGuestProfileService, GuestProfileService>();
+builder.Services.AddScoped<ISubscriptionPlanService, SubscriptionPlanService>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<IHotelOnboardingService, HotelOnboardingService>();
 
 // AI Services Registration
 builder.Services.AddHttpClient<IEmbedderService, OllamaEmbedderService>();

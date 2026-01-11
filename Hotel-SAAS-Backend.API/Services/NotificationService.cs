@@ -10,6 +10,7 @@ namespace Hotel_SAAS_Backend.API.Services
     public class NotificationService(
         INotificationRepository notificationRepository,
         IBookingRepository bookingRepository,
+        IUserRepository userRepository,
         IEmailService emailService) : INotificationService
     {
         public async Task<NotificationSummaryDto> GetUserNotificationsAsync(Guid userId, int limit = 50)
@@ -40,6 +41,48 @@ namespace Hotel_SAAS_Backend.API.Services
 
             var created = await notificationRepository.CreateAsync(notification);
             return Mapper.ToDto(created);
+        }
+
+        public async Task<NotificationDto> CreateAsync(CreateNotificationDto dto)
+        {
+            var notification = new Notification
+            {
+                UserId = dto.UserId,
+                Title = dto.Title,
+                Message = dto.Message,
+                Type = dto.Type,
+                ActionUrl = dto.ActionUrl,
+                BookingId = dto.BookingId,
+                PromotionId = dto.PromotionId,
+                Channel = NotificationChannel.InApp,
+                Status = NotificationStatus.Sent,
+                SentAt = DateTime.UtcNow
+            };
+
+            var created = await notificationRepository.CreateAsync(notification);
+            return Mapper.ToDto(created);
+        }
+
+        public async Task NotifyAdminsAsync(string title, string message, NotificationType type, string? actionUrl = null)
+        {
+            var admins = await userRepository.GetByRoleAsync(UserRole.SuperAdmin);
+            
+            foreach (var admin in admins)
+            {
+                var notification = new Notification
+                {
+                    UserId = admin.Id,
+                    Title = title,
+                    Message = message,
+                    Type = type,
+                    ActionUrl = actionUrl,
+                    Channel = NotificationChannel.InApp,
+                    Status = NotificationStatus.Sent,
+                    SentAt = DateTime.UtcNow
+                };
+                
+                await notificationRepository.CreateAsync(notification);
+            }
         }
 
         public async Task MarkAsReadAsync(Guid notificationId)
