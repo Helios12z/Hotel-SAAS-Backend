@@ -85,6 +85,9 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Email Configuration
+builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
+
 // Repository Registration
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
@@ -94,6 +97,10 @@ builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IAmenityRepository, AmenityRepository>();
+builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
+builder.Services.AddScoped<IWishlistRepository, WishlistRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IRecentlyViewedRepository, RecentlyViewedRepository>();
 
 // Unit of Work Registration
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -109,6 +116,12 @@ builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IAmenityService, AmenityService>();
+builder.Services.AddScoped<IPromotionService, PromotionService>();
+builder.Services.AddScoped<IWishlistService, WishlistService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IGuestProfileService, GuestProfileService>();
 
 // AI Services Registration
 builder.Services.AddHttpClient<IEmbedderService, OllamaEmbedderService>();

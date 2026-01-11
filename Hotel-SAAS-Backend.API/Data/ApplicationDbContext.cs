@@ -1,4 +1,5 @@
 using Hotel_SAAS_Backend.API.Models.Entities;
+using Hotel_SAAS_Backend.API.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -46,6 +47,21 @@ namespace Hotel_SAAS_Backend.API.Data
         public DbSet<BotMessage> BotMessages { get; set; }
         public DbSet<KnowledgeDocument> KnowledgeDocuments { get; set; }
         public DbSet<KnowledgeChunk> KnowledgeChunks { get; set; }
+
+        // Promotions & Coupons
+        public DbSet<Promotion> Promotions { get; set; }
+        public DbSet<Coupon> Coupons { get; set; }
+        public DbSet<UserPromotion> UserPromotions { get; set; }
+
+        // Wishlist
+        public DbSet<Wishlist> Wishlists { get; set; }
+
+        // Notifications
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<EmailTemplate> EmailTemplates { get; set; }
+
+        // Guest Profile
+        public DbSet<RecentlyViewedHotel> RecentlyViewedHotels { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -429,6 +445,162 @@ namespace Hotel_SAAS_Backend.API.Data
                 entity.HasOne(e => e.Document)
                     .WithMany(d => d.Chunks)
                     .HasForeignKey(e => e.DocumentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Promotion Configuration
+            modelBuilder.Entity<Promotion>(entity =>
+            {
+                entity.ToTable("promotions");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Code).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.DiscountValue).HasPrecision(18, 2);
+                entity.Property(e => e.MaxDiscountAmount).HasPrecision(18, 2);
+                entity.Property(e => e.MinBookingAmount).HasPrecision(18, 2);
+                entity.HasIndex(e => e.Code).IsUnique();
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.StartDate);
+                entity.HasIndex(e => e.EndDate);
+
+                entity.HasOne(e => e.Brand)
+                    .WithMany()
+                    .HasForeignKey(e => e.BrandId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.Hotel)
+                    .WithMany()
+                    .HasForeignKey(e => e.HotelId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // Coupon Configuration
+            modelBuilder.Entity<Coupon>(entity =>
+            {
+                entity.ToTable("coupons");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Code).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.DiscountApplied).HasPrecision(18, 2);
+                entity.HasIndex(e => e.Code).IsUnique();
+                entity.HasIndex(e => e.PromotionId);
+                entity.HasIndex(e => e.Status);
+
+                entity.HasOne(e => e.Promotion)
+                    .WithMany(p => p.Coupons)
+                    .HasForeignKey(e => e.PromotionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.AssignedToUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.AssignedToUserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.UsedByUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.UsedByUserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.UsedInBooking)
+                    .WithMany()
+                    .HasForeignKey(e => e.UsedInBookingId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // UserPromotion Configuration
+            modelBuilder.Entity<UserPromotion>(entity =>
+            {
+                entity.ToTable("user_promotions");
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => new { e.UserId, e.PromotionId }).IsUnique();
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Promotion)
+                    .WithMany()
+                    .HasForeignKey(e => e.PromotionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Wishlist Configuration
+            modelBuilder.Entity<Wishlist>(entity =>
+            {
+                entity.ToTable("wishlists");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Note).HasMaxLength(500);
+                entity.HasIndex(e => new { e.UserId, e.HotelId }).IsUnique();
+                entity.HasIndex(e => e.UserId);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Hotel)
+                    .WithMany()
+                    .HasForeignKey(e => e.HotelId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Notification Configuration
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.ToTable("notifications");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Title).IsRequired().HasMaxLength(500);
+                entity.Property(e => e.Message).IsRequired();
+                entity.Property(e => e.ActionUrl).HasMaxLength(1000);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.Type);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.CreatedAt);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Booking)
+                    .WithMany()
+                    .HasForeignKey(e => e.BookingId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.Promotion)
+                    .WithMany()
+                    .HasForeignKey(e => e.PromotionId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // EmailTemplate Configuration
+            modelBuilder.Entity<EmailTemplate>(entity =>
+            {
+                entity.ToTable("email_templates");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Subject).IsRequired().HasMaxLength(500);
+                entity.Property(e => e.Body).IsRequired();
+                entity.HasIndex(e => e.Name).IsUnique();
+            });
+
+            // RecentlyViewedHotel Configuration
+            modelBuilder.Entity<RecentlyViewedHotel>(entity =>
+            {
+                entity.ToTable("recently_viewed_hotels");
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => new { e.UserId, e.HotelId }).IsUnique();
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.ViewedAt);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Hotel)
+                    .WithMany()
+                    .HasForeignKey(e => e.HotelId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
         }

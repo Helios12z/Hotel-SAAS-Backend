@@ -7,7 +7,10 @@ using Hotel_SAAS_Backend.API.Models.Enums;
 
 namespace Hotel_SAAS_Backend.API.Services
 {
-    public class RoomService(IRoomRepository roomRepository) : IRoomService
+    public class RoomService(
+        IRoomRepository roomRepository,
+        IHotelRepository hotelRepository,
+        IBookingRepository bookingRepository) : IRoomService
     {
         public async Task<RoomDto?> GetRoomByIdAsync(Guid id)
         {
@@ -70,6 +73,56 @@ namespace Hotel_SAAS_Backend.API.Services
             room.Status = status;
             await roomRepository.UpdateAsync(room);
             return true;
+        }
+
+        public async Task<HotelAvailabilityDto?> CheckAvailabilityAsync(Guid hotelId, RoomAvailabilityRequestDto request)
+        {
+            var hotel = await hotelRepository.GetByIdAsync(hotelId);
+            if (hotel == null) return null;
+
+            var numberOfNights = (int)(request.CheckOutDate - request.CheckInDate).TotalDays;
+            if (numberOfNights <= 0) return null;
+
+            // Get booked room IDs for the date range
+            var bookedRoomIds = await bookingRepository.GetBookedRoomIdsAsync(
+                hotelId, request.CheckInDate, request.CheckOutDate);
+
+            // Get available rooms
+            var availableRooms = await roomRepository.GetAvailableRoomsByHotelAsync(hotelId, bookedRoomIds);
+
+            // Filter by guest capacity if specified
+            if (request.NumberOfGuests > 0)
+            {
+                availableRooms = availableRooms.Where(r => r.MaxOccupancy >= request.NumberOfGuests);
+            }
+
+            var roomDtos = availableRooms.Select(r => new RoomAvailabilityDto
+            {
+                RoomId = r.Id,
+                RoomNumber = r.RoomNumber,
+                Type = r.Type,
+                BedType = r.BedType,
+                MaxOccupancy = r.MaxOccupancy,
+                BasePrice = r.BasePrice,
+                TotalPrice = r.BasePrice * numberOfNights,
+                NumberOfNights = numberOfNights,
+                IsAvailable = true,
+                ImageUrl = r.Images?.FirstOrDefault(i => i.IsPrimary)?.ImageUrl ?? r.Images?.FirstOrDefault()?.ImageUrl,
+                Description = r.Description,
+                Amenities = r.Amenities?.Select(ra => Mapper.ToDto(ra.Amenity)).ToList() ?? new()
+            }).ToList();
+
+            return new HotelAvailabilityDto
+            {
+                HotelId = hotelId,
+                HotelName = hotel.Name,
+                CheckInDate = request.CheckInDate,
+                CheckOutDate = request.CheckOutDate,
+                NumberOfNights = numberOfNights,
+                AvailableRooms = roomDtos,
+                TotalAvailableRooms = roomDtos.Count,
+                LowestPrice = roomDtos.Any() ? roomDtos.Min(r => r.TotalPrice) : null
+            };
         }
     }
 }

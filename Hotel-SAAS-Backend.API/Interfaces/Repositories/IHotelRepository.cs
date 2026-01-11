@@ -15,5 +15,19 @@ namespace Hotel_SAAS_Backend.API.Interfaces.Repositories
         Task DeleteAsync(Guid id);
         Task<bool> ExistsAsync(Guid id);
         Task UpdateRatingAsync(Guid hotelId, float newRating);
+        Task<(IEnumerable<Hotel> Hotels, int TotalCount)> SearchWithPaginationAsync(
+            string? query,
+            string? city,
+            string? country,
+            int? minStarRating,
+            int? maxStarRating,
+            decimal? minPrice,
+            decimal? maxPrice,
+            List<Guid>? amenityIds,
+            float? minRating,
+            int page,
+            int pageSize,
+            string? sortBy,
+            bool sortDescending);
     }
 }

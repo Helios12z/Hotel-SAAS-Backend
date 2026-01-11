@@ -98,5 +98,24 @@ namespace Hotel_SAAS_Backend.API.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(b => b.Id == id && !b.IsDeleted);
         }
+
+        public async Task<List<Guid>> GetBookedRoomIdsAsync(Guid hotelId, DateTime checkIn, DateTime checkOut)
+        {
+            // L?y danh sách room IDs ?ã ???c book trong kho?ng th?i gian
+            var bookedRoomIds = await _context.BookingRooms
+                .Include(br => br.Booking)
+                .Where(br =>
+                    br.Booking.HotelId == hotelId &&
+                    br.Booking.Status != BookingStatus.Cancelled &&
+                    br.Booking.Status != BookingStatus.CheckedOut &&
+                    // Check date overlap
+                    br.Booking.CheckInDate < checkOut &&
+                    br.Booking.CheckOutDate > checkIn)
+                .Select(br => br.RoomId)
+                .Distinct()
+                .ToListAsync();
+
+            return bookedRoomIds;
+        }
     }
 }

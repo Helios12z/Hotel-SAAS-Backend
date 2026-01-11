@@ -537,6 +537,7 @@ namespace Hotel_SAAS_Backend.API.Mapping
                 ConfirmedAt = entity.ConfirmedAt,
                 CheckedInAt = entity.CheckedInAt,
                 CheckedOutAt = entity.CheckedOutAt,
+                AppliedCouponCode = entity.AppliedCouponCode,
                 Rooms = entity.BookingRooms?.Select(br => new BookingRoomDetailDto
                 {
                     Id = br.Id,
@@ -709,6 +710,239 @@ namespace Hotel_SAAS_Backend.API.Mapping
             if (dto.ServiceRating.HasValue) entity.ServiceRating = dto.ServiceRating.Value;
             if (dto.LocationRating.HasValue) entity.LocationRating = dto.LocationRating.Value;
             if (dto.ValueRating.HasValue) entity.ValueRating = dto.ValueRating.Value;
+            entity.UpdatedAt = DateTime.UtcNow;
+        }
+
+        #endregion
+
+        #region Promotion Mappings
+
+        public static PromotionDto ToDto(Promotion entity)
+        {
+            var now = DateTime.UtcNow;
+            return new PromotionDto
+            {
+                Id = entity.Id,
+                CreatedAt = entity.CreatedAt,
+                UpdatedAt = entity.UpdatedAt,
+                Name = entity.Name,
+                Description = entity.Description,
+                Code = entity.Code,
+                Type = entity.Type,
+                Status = entity.Status,
+                DiscountValue = entity.DiscountValue,
+                MaxDiscountAmount = entity.MaxDiscountAmount,
+                MinBookingAmount = entity.MinBookingAmount,
+                StartDate = entity.StartDate,
+                EndDate = entity.EndDate,
+                MaxUsageCount = entity.MaxUsageCount,
+                CurrentUsageCount = entity.CurrentUsageCount,
+                MaxUsagePerUser = entity.MaxUsagePerUser,
+                BrandId = entity.BrandId,
+                BrandName = entity.Brand?.Name,
+                HotelId = entity.HotelId,
+                HotelName = entity.Hotel?.Name,
+                MinNights = entity.MinNights,
+                MinDaysBeforeCheckIn = entity.MinDaysBeforeCheckIn,
+                IsPublic = entity.IsPublic,
+                IsValid = entity.Status == PromotionStatus.Active &&
+                          entity.StartDate <= now &&
+                          entity.EndDate >= now &&
+                          (entity.MaxUsageCount == null || entity.CurrentUsageCount < entity.MaxUsageCount)
+            };
+        }
+
+        public static Promotion ToEntity(CreatePromotionDto dto)
+        {
+            return new Promotion
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                Code = dto.Code.ToUpper(),
+                Type = dto.Type,
+                Status = PromotionStatus.Draft,
+                DiscountValue = dto.DiscountValue,
+                MaxDiscountAmount = dto.MaxDiscountAmount,
+                MinBookingAmount = dto.MinBookingAmount,
+                StartDate = dto.StartDate,
+                EndDate = dto.EndDate,
+                MaxUsageCount = dto.MaxUsageCount,
+                MaxUsagePerUser = dto.MaxUsagePerUser,
+                BrandId = dto.BrandId,
+                HotelId = dto.HotelId,
+                MinNights = dto.MinNights,
+                MinDaysBeforeCheckIn = dto.MinDaysBeforeCheckIn,
+                IsPublic = dto.IsPublic,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+        }
+
+        public static void UpdateEntity(UpdatePromotionDto dto, Promotion entity)
+        {
+            if (dto.Name != null) entity.Name = dto.Name;
+            if (dto.Description != null) entity.Description = dto.Description;
+            if (dto.Status.HasValue) entity.Status = dto.Status.Value;
+            if (dto.DiscountValue.HasValue) entity.DiscountValue = dto.DiscountValue.Value;
+            if (dto.MaxDiscountAmount.HasValue) entity.MaxDiscountAmount = dto.MaxDiscountAmount.Value;
+            if (dto.MinBookingAmount.HasValue) entity.MinBookingAmount = dto.MinBookingAmount.Value;
+            if (dto.StartDate.HasValue) entity.StartDate = dto.StartDate.Value;
+            if (dto.EndDate.HasValue) entity.EndDate = dto.EndDate.Value;
+            if (dto.MaxUsageCount.HasValue) entity.MaxUsageCount = dto.MaxUsageCount.Value;
+            if (dto.MaxUsagePerUser.HasValue) entity.MaxUsagePerUser = dto.MaxUsagePerUser.Value;
+            if (dto.MinNights.HasValue) entity.MinNights = dto.MinNights.Value;
+            if (dto.MinDaysBeforeCheckIn.HasValue) entity.MinDaysBeforeCheckIn = dto.MinDaysBeforeCheckIn.Value;
+            if (dto.IsPublic.HasValue) entity.IsPublic = dto.IsPublic.Value;
+            entity.UpdatedAt = DateTime.UtcNow;
+        }
+
+        public static CouponDto ToDto(Coupon entity)
+        {
+            return new CouponDto
+            {
+                Id = entity.Id,
+                CreatedAt = entity.CreatedAt,
+                UpdatedAt = entity.UpdatedAt,
+                PromotionId = entity.PromotionId,
+                PromotionName = entity.Promotion?.Name ?? "",
+                Code = entity.Code,
+                Status = entity.Status,
+                AssignedToUserId = entity.AssignedToUserId,
+                ExpiresAt = entity.ExpiresAt,
+                DiscountApplied = entity.DiscountApplied,
+                UsedAt = entity.UsedAt
+            };
+        }
+
+        #endregion
+
+        #region Wishlist Mappings
+
+        public static WishlistDto ToDto(Wishlist entity)
+        {
+            return new WishlistDto
+            {
+                Id = entity.Id,
+                CreatedAt = entity.CreatedAt,
+                UpdatedAt = entity.UpdatedAt,
+                UserId = entity.UserId,
+                HotelId = entity.HotelId,
+                Note = entity.Note,
+                Hotel = ToDto(entity.Hotel)
+            };
+        }
+
+        public static Wishlist ToEntity(AddToWishlistDto dto, Guid userId)
+        {
+            return new Wishlist
+            {
+                UserId = userId,
+                HotelId = dto.HotelId,
+                Note = dto.Note,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+        }
+
+        #endregion
+
+        #region Notification Mappings
+
+        public static NotificationDto ToDto(Notification entity)
+        {
+            return new NotificationDto
+            {
+                Id = entity.Id,
+                CreatedAt = entity.CreatedAt,
+                UpdatedAt = entity.UpdatedAt,
+                Type = entity.Type,
+                Channel = entity.Channel,
+                Status = entity.Status,
+                Title = entity.Title,
+                Message = entity.Message,
+                ActionUrl = entity.ActionUrl,
+                BookingId = entity.BookingId,
+                PromotionId = entity.PromotionId,
+                ReadAt = entity.ReadAt
+            };
+        }
+
+        public static Notification ToEntity(SendNotificationDto dto)
+        {
+            return new Notification
+            {
+                UserId = dto.UserId,
+                Type = dto.Type,
+                Channel = dto.Channel,
+                Status = NotificationStatus.Pending,
+                Title = dto.Title,
+                Message = dto.Message,
+                ActionUrl = dto.ActionUrl,
+                BookingId = dto.BookingId,
+                PromotionId = dto.PromotionId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+        }
+
+        #endregion
+
+        #region Guest Profile Mappings
+
+        public static GuestProfileDto ToGuestProfileDto(User entity, int totalBookings, int completedStays, int totalReviews)
+        {
+            return new GuestProfileDto
+            {
+                Id = entity.Id,
+                Email = entity.Email,
+                FirstName = entity.FirstName,
+                LastName = entity.LastName,
+                PhoneNumber = entity.PhoneNumber,
+                AvatarUrl = entity.AvatarUrl,
+                Nationality = entity.Nationality,
+                PreferredLanguage = entity.PreferredLanguage,
+                PreferredCurrency = entity.PreferredCurrency,
+                EmailNotificationsEnabled = entity.EmailNotificationsEnabled,
+                SmsNotificationsEnabled = entity.SmsNotificationsEnabled,
+                DateOfBirth = entity.DateOfBirth,
+                Address = entity.Address,
+                City = entity.City,
+                Country = entity.Country,
+                CreatedAt = entity.CreatedAt,
+                LastLoginAt = entity.LastLoginAt,
+                TotalBookings = totalBookings,
+                CompletedStays = completedStays,
+                TotalReviews = totalReviews
+            };
+        }
+
+        public static RecentlyViewedHotelDto ToDto(RecentlyViewedHotel entity)
+        {
+            return new RecentlyViewedHotelDto
+            {
+                HotelId = entity.HotelId,
+                HotelName = entity.Hotel?.Name ?? "",
+                HotelImageUrl = entity.Hotel?.ImageUrl,
+                City = entity.Hotel?.City,
+                StarRating = entity.Hotel?.StarRating ?? 0,
+                AverageRating = entity.Hotel?.AverageRating,
+                MinPrice = entity.Hotel?.Rooms?.Any() == true
+                    ? entity.Hotel.Rooms.Min(r => r.BasePrice)
+                    : null,
+                ViewedAt = entity.ViewedAt,
+                ViewCount = entity.ViewCount
+            };
+        }
+
+        public static void UpdateGuestPreferences(UpdateGuestPreferencesDto dto, User entity)
+        {
+            if (dto.PreferredLanguage != null) entity.PreferredLanguage = dto.PreferredLanguage;
+            if (dto.PreferredCurrency != null) entity.PreferredCurrency = dto.PreferredCurrency;
+            if (dto.EmailNotificationsEnabled.HasValue) entity.EmailNotificationsEnabled = dto.EmailNotificationsEnabled.Value;
+            if (dto.SmsNotificationsEnabled.HasValue) entity.SmsNotificationsEnabled = dto.SmsNotificationsEnabled.Value;
+            if (dto.Nationality != null) entity.Nationality = dto.Nationality;
+            if (dto.IdDocumentType != null) entity.IdDocumentType = dto.IdDocumentType;
+            if (dto.IdDocumentNumber != null) entity.IdDocumentNumber = dto.IdDocumentNumber;
             entity.UpdatedAt = DateTime.UtcNow;
         }
 

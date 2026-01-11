@@ -17,6 +17,7 @@ namespace Hotel_SAAS_Backend.API.Models.DTOs
         public string? SpecialRequests { get; set; }
         public string? PaymentMethod { get; set; }
         public string? Currency { get; set; } = "USD";
+        public string? CouponCode { get; set; }
     }
 
     public class BookingRoomDto
@@ -83,6 +84,7 @@ namespace Hotel_SAAS_Backend.API.Models.DTOs
         public string? HotelAddress { get; set; }
         public string? HotelCity { get; set; }
         public string? HotelPhoneNumber { get; set; }
+        public string? AppliedCouponCode { get; set; }
     }
 
     public class BookingRoomDetailDto

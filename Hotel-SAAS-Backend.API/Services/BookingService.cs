@@ -9,7 +9,9 @@ namespace Hotel_SAAS_Backend.API.Services
 {
     public class BookingService(
         IBookingRepository bookingRepository,
-        IRoomRepository roomRepository) : IBookingService
+        IRoomRepository roomRepository,
+        IPromotionService promotionService,
+        IPromotionRepository promotionRepository) : IBookingService
     {
         public async Task<BookingDto?> GetBookingByIdAsync(Guid id)
         {
@@ -49,6 +51,41 @@ namespace Hotel_SAAS_Backend.API.Services
             // Calculate pricing
             var calculation = await CalculatePriceInternalAsync(createBookingDto);
 
+            decimal discountAmount = 0;
+            string? appliedCouponCode = null;
+            Guid? appliedPromotionId = null;
+
+            // Apply coupon if provided
+            if (!string.IsNullOrWhiteSpace(createBookingDto.CouponCode))
+            {
+                var validationDto = new ValidateCouponDto
+                {
+                    Code = createBookingDto.CouponCode,
+                    HotelId = createBookingDto.HotelId,
+                    BookingAmount = calculation.Subtotal,
+                    CheckInDate = createBookingDto.CheckInDate,
+                    CheckOutDate = createBookingDto.CheckOutDate
+                };
+
+                var validationResult = await promotionService.ValidateCouponAsync(validationDto, Guid.Empty);
+
+                if (validationResult.IsValid && validationResult.CalculatedDiscount.HasValue)
+                {
+                    discountAmount = validationResult.CalculatedDiscount.Value;
+                    appliedCouponCode = validationResult.Code;
+
+                    // Get promotion and increment usage count
+                    var promotion = await promotionRepository.GetByCodeAsync(createBookingDto.CouponCode);
+                    if (promotion != null)
+                    {
+                        appliedPromotionId = promotion.Id;
+                        await promotionRepository.IncrementUsageCountAsync(promotion.Id);
+                    }
+                }
+            }
+
+            var totalAmount = calculation.Subtotal + calculation.TaxAmount + calculation.ServiceFee - discountAmount;
+
             var booking = new Booking
             {
                 Id = Guid.NewGuid(),
@@ -62,14 +99,16 @@ namespace Hotel_SAAS_Backend.API.Services
                 Subtotal = calculation.Subtotal,
                 TaxAmount = calculation.TaxAmount,
                 ServiceFee = calculation.ServiceFee,
-                DiscountAmount = calculation.DiscountAmount,
-                TotalAmount = calculation.TotalAmount,
+                DiscountAmount = discountAmount,
+                TotalAmount = totalAmount,
                 Currency = createBookingDto.Currency ?? "USD",
                 Status = BookingStatus.Pending,
                 GuestName = createBookingDto.GuestName,
                 GuestEmail = createBookingDto.GuestEmail,
                 GuestPhoneNumber = createBookingDto.GuestPhoneNumber,
                 SpecialRequests = createBookingDto.SpecialRequests,
+                AppliedCouponCode = appliedCouponCode,
+                AppliedPromotionId = appliedPromotionId,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };

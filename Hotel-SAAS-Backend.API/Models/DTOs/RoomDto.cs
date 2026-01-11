@@ -92,4 +92,39 @@ namespace Hotel_SAAS_Backend.API.Models.DTOs
         public int DisplayOrder { get; set; }
         public bool IsPrimary { get; set; }
     }
+
+    public class RoomAvailabilityRequestDto
+    {
+        public DateTime CheckInDate { get; set; }
+        public DateTime CheckOutDate { get; set; }
+        public int NumberOfGuests { get; set; } = 1;
+    }
+
+    public class RoomAvailabilityDto
+    {
+        public Guid RoomId { get; set; }
+        public string RoomNumber { get; set; } = string.Empty;
+        public RoomType Type { get; set; }
+        public BedType BedType { get; set; }
+        public int MaxOccupancy { get; set; }
+        public decimal BasePrice { get; set; }
+        public decimal TotalPrice { get; set; }
+        public int NumberOfNights { get; set; }
+        public bool IsAvailable { get; set; }
+        public string? ImageUrl { get; set; }
+        public string? Description { get; set; }
+        public List<AmenityDto> Amenities { get; set; } = new();
+    }
+
+    public class HotelAvailabilityDto
+    {
+        public Guid HotelId { get; set; }
+        public string HotelName { get; set; } = string.Empty;
+        public DateTime CheckInDate { get; set; }
+        public DateTime CheckOutDate { get; set; }
+        public int NumberOfNights { get; set; }
+        public List<RoomAvailabilityDto> AvailableRooms { get; set; } = new();
+        public int TotalAvailableRooms { get; set; }
+        public decimal? LowestPrice { get; set; }
+    }
 }

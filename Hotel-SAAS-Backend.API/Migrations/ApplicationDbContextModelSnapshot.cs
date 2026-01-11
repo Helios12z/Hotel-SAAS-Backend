@@ -72,6 +72,12 @@ namespace Hotel_SAAS_Backend.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("AppliedCouponCode")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("AppliedPromotionId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime?>("BookedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -190,6 +196,8 @@ namespace Hotel_SAAS_Backend.API.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AppliedPromotionId");
 
                     b.HasIndex("CheckInDate");
 
@@ -417,6 +425,118 @@ namespace Hotel_SAAS_Backend.API.Migrations
                     b.HasIndex("Name");
 
                     b.ToTable("brands", (string)null);
+                });
+
+            modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.Coupon", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AssignedToUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal?>("DiscountApplied")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UsedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("UsedInBookingId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedToUserId");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("PromotionId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("UsedByUserId");
+
+                    b.HasIndex("UsedInBookingId");
+
+                    b.ToTable("coupons", (string)null);
+                });
+
+            modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.EmailTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("email_templates", (string)null);
                 });
 
             modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.Facet", b =>
@@ -818,6 +938,84 @@ namespace Hotel_SAAS_Backend.API.Migrations
                     b.ToTable("knowledge_documents", (string)null);
                 });
 
+            modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ActionUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid?>("BookingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Channel")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EmailBody")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EmailSubject")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("PromotionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("SentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookingId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("PromotionId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("Type");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("notifications", (string)null);
+                });
+
             modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.Payment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -902,6 +1100,147 @@ namespace Hotel_SAAS_Backend.API.Migrations
                         .IsUnique();
 
                     b.ToTable("payments", (string)null);
+                });
+
+            modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.Promotion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("BrandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CurrentUsageCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("DiscountValue")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("HotelId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal?>("MaxDiscountAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<int?>("MaxUsageCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("MaxUsagePerUser")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal?>("MinBookingAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<int?>("MinDaysBeforeCheckIn")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("MinNights")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BrandId");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("EndDate");
+
+                    b.HasIndex("HotelId");
+
+                    b.HasIndex("StartDate");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("promotions", (string)null);
+                });
+
+            modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.RecentlyViewedHotel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("HotelId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ViewedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HotelId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("ViewedAt");
+
+                    b.HasIndex("UserId", "HotelId")
+                        .IsUnique();
+
+                    b.ToTable("recently_viewed_hotels", (string)null);
                 });
 
             modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.Review", b =>
@@ -1423,8 +1762,92 @@ namespace Hotel_SAAS_Backend.API.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.UserPromotion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LastUsedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UsageCount")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PromotionId");
+
+                    b.HasIndex("UserId", "PromotionId")
+                        .IsUnique();
+
+                    b.ToTable("user_promotions", (string)null);
+                });
+
+            modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.Wishlist", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("HotelId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HotelId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "HotelId")
+                        .IsUnique();
+
+                    b.ToTable("wishlists", (string)null);
+                });
+
             modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.Booking", b =>
                 {
+                    b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.Promotion", "AppliedPromotion")
+                        .WithMany()
+                        .HasForeignKey("AppliedPromotionId");
+
                     b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.User", "Guest")
                         .WithMany("Bookings")
                         .HasForeignKey("GuestId")
@@ -1436,6 +1859,8 @@ namespace Hotel_SAAS_Backend.API.Migrations
                         .HasForeignKey("HotelId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("AppliedPromotion");
 
                     b.Navigation("Guest");
 
@@ -1470,6 +1895,38 @@ namespace Hotel_SAAS_Backend.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Conversation");
+                });
+
+            modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.Coupon", b =>
+                {
+                    b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.User", "AssignedToUser")
+                        .WithMany()
+                        .HasForeignKey("AssignedToUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.Promotion", "Promotion")
+                        .WithMany("Coupons")
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.User", "UsedByUser")
+                        .WithMany()
+                        .HasForeignKey("UsedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.Booking", "UsedInBooking")
+                        .WithMany()
+                        .HasForeignKey("UsedInBookingId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("AssignedToUser");
+
+                    b.Navigation("Promotion");
+
+                    b.Navigation("UsedByUser");
+
+                    b.Navigation("UsedInBooking");
                 });
 
             modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.FacetValue", b =>
@@ -1535,6 +1992,31 @@ namespace Hotel_SAAS_Backend.API.Migrations
                     b.Navigation("Document");
                 });
 
+            modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.Notification", b =>
+                {
+                    b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.Booking", "Booking")
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.Promotion", "Promotion")
+                        .WithMany()
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+
+                    b.Navigation("Promotion");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.Payment", b =>
                 {
                     b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.Booking", "Booking")
@@ -1544,6 +2026,42 @@ namespace Hotel_SAAS_Backend.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Booking");
+                });
+
+            modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.Promotion", b =>
+                {
+                    b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.Hotel", "Hotel")
+                        .WithMany()
+                        .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Brand");
+
+                    b.Navigation("Hotel");
+                });
+
+            modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.RecentlyViewedHotel", b =>
+                {
+                    b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.Hotel", "Hotel")
+                        .WithMany()
+                        .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Hotel");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.Review", b =>
@@ -1659,6 +2177,44 @@ namespace Hotel_SAAS_Backend.API.Migrations
                     b.Navigation("Hotel");
                 });
 
+            modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.UserPromotion", b =>
+                {
+                    b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.Promotion", "Promotion")
+                        .WithMany()
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Promotion");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.Wishlist", b =>
+                {
+                    b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.Hotel", "Hotel")
+                        .WithMany()
+                        .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Hotel_SAAS_Backend.API.Models.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Hotel");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.Amenity", b =>
                 {
                     b.Navigation("HotelAmenities");
@@ -1704,6 +2260,11 @@ namespace Hotel_SAAS_Backend.API.Migrations
             modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.KnowledgeDocument", b =>
                 {
                     b.Navigation("Chunks");
+                });
+
+            modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.Promotion", b =>
+                {
+                    b.Navigation("Coupons");
                 });
 
             modelBuilder.Entity("Hotel_SAAS_Backend.API.Models.Entities.Review", b =>

@@ -36,10 +36,15 @@ namespace Hotel_SAAS_Backend.API.Models.Entities
         public string? PaymentMethod { get; set; }
         public bool IsPaid { get; set; } = false;
         public DateTime? PaidAt { get; set; }
+        
+        // Coupon/Promotion tracking
+        public string? AppliedCouponCode { get; set; }
+        public Guid? AppliedPromotionId { get; set; }
 
         // Navigation properties
         public virtual Hotel Hotel { get; set; } = null!;
         public virtual User Guest { get; set; } = null!;
+        public virtual Promotion? AppliedPromotion { get; set; }
         public virtual ICollection<BookingRoom> BookingRooms { get; set; } = new List<BookingRoom>();
         public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }

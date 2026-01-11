@@ -97,5 +97,92 @@ namespace Hotel_SAAS_Backend.API.Repositories
                 .Where(h => !h.IsDeleted)
                 .ToListAsync();
         }
+
+        public async Task<(IEnumerable<Hotel> Hotels, int TotalCount)> SearchWithPaginationAsync(
+            string? query,
+            string? city,
+            string? country,
+            int? minStarRating,
+            int? maxStarRating,
+            decimal? minPrice,
+            decimal? maxPrice,
+            List<Guid>? amenityIds,
+            float? minRating,
+            int page,
+            int pageSize,
+            string? sortBy,
+            bool sortDescending)
+        {
+            var hotels = _dbSet
+                .Include(h => h.Brand)
+                .Include(h => h.Rooms)
+                .Include(h => h.Amenities)
+                    .ThenInclude(ha => ha.Amenity)
+                .AsNoTracking()
+                .Where(h => !h.IsDeleted && h.IsActive);
+
+            // Apply filters
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                var lowerQuery = query.ToLower();
+                hotels = hotels.Where(h =>
+                    h.Name.ToLower().Contains(lowerQuery) ||
+                    (h.Description != null && h.Description.ToLower().Contains(lowerQuery)) ||
+                    (h.City != null && h.City.ToLower().Contains(lowerQuery)));
+            }
+
+            if (!string.IsNullOrWhiteSpace(city))
+                hotels = hotels.Where(h => h.City != null && h.City.ToLower() == city.ToLower());
+
+            if (!string.IsNullOrWhiteSpace(country))
+                hotels = hotels.Where(h => h.Country != null && h.Country.ToLower() == country.ToLower());
+
+            if (minStarRating.HasValue)
+                hotels = hotels.Where(h => h.StarRating >= minStarRating.Value);
+
+            if (maxStarRating.HasValue)
+                hotels = hotels.Where(h => h.StarRating <= maxStarRating.Value);
+
+            if (minPrice.HasValue)
+                hotels = hotels.Where(h => h.Rooms.Any(r => r.BasePrice >= minPrice.Value));
+
+            if (maxPrice.HasValue)
+                hotels = hotels.Where(h => h.Rooms.Any(r => r.BasePrice <= maxPrice.Value));
+
+            if (minRating.HasValue)
+                hotels = hotels.Where(h => h.AverageRating >= minRating.Value);
+
+            if (amenityIds != null && amenityIds.Count > 0)
+                hotels = hotels.Where(h => h.Amenities.Any(a => amenityIds.Contains(a.AmenityId)));
+
+            // Get total count before pagination
+            var totalCount = await hotels.CountAsync();
+
+            // Apply sorting
+            hotels = sortBy?.ToLower() switch
+            {
+                "price" => sortDescending
+                    ? hotels.OrderByDescending(h => h.Rooms.Min(r => r.BasePrice))
+                    : hotels.OrderBy(h => h.Rooms.Min(r => r.BasePrice)),
+                "rating" => sortDescending
+                    ? hotels.OrderByDescending(h => h.AverageRating)
+                    : hotels.OrderBy(h => h.AverageRating),
+                "name" => sortDescending
+                    ? hotels.OrderByDescending(h => h.Name)
+                    : hotels.OrderBy(h => h.Name),
+                "star" => sortDescending
+                    ? hotels.OrderByDescending(h => h.StarRating)
+                    : hotels.OrderBy(h => h.StarRating),
+                _ => hotels.OrderByDescending(h => h.AverageRating) // Default sort
+            };
+
+            // Apply pagination
+            var result = await hotels
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (result, totalCount);
+        }
     }
 }

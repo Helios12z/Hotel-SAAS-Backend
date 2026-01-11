@@ -10,10 +10,12 @@ namespace Hotel_SAAS_Backend.API.Controllers
     public class HotelsController : ControllerBase
     {
         private readonly IHotelService _hotelService;
+        private readonly IRoomService _roomService;
 
-        public HotelsController(IHotelService hotelService)
+        public HotelsController(IHotelService hotelService, IRoomService roomService)
         {
             _hotelService = hotelService;
+            _roomService = roomService;
         }
 
         [HttpGet]
@@ -79,16 +81,63 @@ namespace Hotel_SAAS_Backend.API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<ApiResponseDto<IEnumerable<HotelDto>>>> SearchHotels(
-            [FromQuery] string query,
-            [FromQuery] string? city = null,
-            [FromQuery] int? starRating = null)
+        public async Task<ActionResult<ApiResponseDto<PagedResultDto<HotelSearchResultDto>>>> SearchHotels(
+            [FromQuery] HotelSearchRequestDto request)
         {
-            var hotels = await _hotelService.SearchHotelsAsync(query, city, starRating);
-            return Ok(new ApiResponseDto<IEnumerable<HotelDto>>
+            var result = await _hotelService.SearchHotelsAdvancedAsync(request);
+            return Ok(new ApiResponseDto<PagedResultDto<HotelSearchResultDto>>
             {
                 Success = true,
-                Data = hotels
+                Data = result
+            });
+        }
+
+        [HttpGet("{id}/availability")]
+        public async Task<ActionResult<ApiResponseDto<HotelAvailabilityDto>>> CheckAvailability(
+            Guid id,
+            [FromQuery] DateTime checkInDate,
+            [FromQuery] DateTime checkOutDate,
+            [FromQuery] int numberOfGuests = 1)
+        {
+            if (checkInDate >= checkOutDate)
+            {
+                return BadRequest(new ApiResponseDto<HotelAvailabilityDto>
+                {
+                    Success = false,
+                    Message = "Check-out date must be after check-in date"
+                });
+            }
+
+            if (checkInDate < DateTime.UtcNow.Date)
+            {
+                return BadRequest(new ApiResponseDto<HotelAvailabilityDto>
+                {
+                    Success = false,
+                    Message = "Check-in date cannot be in the past"
+                });
+            }
+
+            var request = new RoomAvailabilityRequestDto
+            {
+                CheckInDate = checkInDate,
+                CheckOutDate = checkOutDate,
+                NumberOfGuests = numberOfGuests
+            };
+
+            var result = await _roomService.CheckAvailabilityAsync(id, request);
+            if (result == null)
+            {
+                return NotFound(new ApiResponseDto<HotelAvailabilityDto>
+                {
+                    Success = false,
+                    Message = "Hotel not found"
+                });
+            }
+
+            return Ok(new ApiResponseDto<HotelAvailabilityDto>
+            {
+                Success = true,
+                Data = result
             });
         }
 

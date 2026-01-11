@@ -16,5 +16,6 @@ namespace Hotel_SAAS_Backend.API.Interfaces.Repositories
         Task DeleteAsync(Guid id);
         Task<bool> ExistsAsync(Guid id);
         Task<bool> IsRoomAvailableAsync(Guid roomId, DateTime checkIn, DateTime checkOut);
+        Task<IEnumerable<Room>> GetAvailableRoomsByHotelAsync(Guid hotelId, List<Guid> excludeRoomIds);
     }
 }

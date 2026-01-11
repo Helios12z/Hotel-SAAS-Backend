@@ -103,4 +103,27 @@ namespace Hotel_SAAS_Backend.API.Models.DTOs
         public List<AmenityDto> Amenities { get; set; } = new();
         public List<ReviewDto> RecentReviews { get; set; } = new();
     }
+
+    public class HotelSearchRequestDto : PaginationRequestDto
+    {
+        public string? Query { get; set; }
+        public string? City { get; set; }
+        public string? Country { get; set; }
+        public int? MinStarRating { get; set; }
+        public int? MaxStarRating { get; set; }
+        public decimal? MinPrice { get; set; }
+        public decimal? MaxPrice { get; set; }
+        public DateTime? CheckInDate { get; set; }
+        public DateTime? CheckOutDate { get; set; }
+        public int? NumberOfGuests { get; set; }
+        public int? NumberOfRooms { get; set; }
+        public List<Guid>? AmenityIds { get; set; }
+        public float? MinRating { get; set; }
+    }
+
+    public class HotelSearchResultDto : HotelDto
+    {
+        public int AvailableRooms { get; set; }
+        public decimal? LowestAvailablePrice { get; set; }
+    }
 }

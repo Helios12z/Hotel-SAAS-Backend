@@ -3,6 +3,7 @@ using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Mapping;
 using Hotel_SAAS_Backend.API.Models.DTOs;
 using Hotel_SAAS_Backend.API.Models.Entities;
+using Hotel_SAAS_Backend.API.Models.Enums;
 
 namespace Hotel_SAAS_Backend.API.Services
 {
@@ -65,6 +66,57 @@ namespace Hotel_SAAS_Backend.API.Services
         {
             // TODO: Implement image update logic
             return true;
+        }
+
+        public async Task<PagedResultDto<HotelSearchResultDto>> SearchHotelsAdvancedAsync(HotelSearchRequestDto request)
+        {
+            var (hotels, totalCount) = await hotelRepository.SearchWithPaginationAsync(
+                request.Query,
+                request.City,
+                request.Country,
+                request.MinStarRating,
+                request.MaxStarRating,
+                request.MinPrice,
+                request.MaxPrice,
+                request.AmenityIds,
+                request.MinRating,
+                request.Page,
+                request.PageSize,
+                request.SortBy,
+                request.SortDescending);
+
+            var items = hotels.Select(h => new HotelSearchResultDto
+            {
+                Id = h.Id,
+                CreatedAt = h.CreatedAt,
+                UpdatedAt = h.UpdatedAt,
+                BrandId = h.BrandId,
+                BrandName = h.Brand?.Name ?? "",
+                Name = h.Name,
+                Description = h.Description,
+                ImageUrl = h.ImageUrl,
+                City = h.City,
+                Country = h.Country,
+                StarRating = h.StarRating,
+                IsActive = h.IsActive,
+                IsVerified = h.IsVerified,
+                AverageRating = h.AverageRating,
+                ReviewCount = h.ReviewCount,
+                MinPrice = h.Rooms?.Any() == true ? h.Rooms.Min(r => r.BasePrice) : null,
+                AvailableRooms = h.Rooms?.Count(r => r.Status == RoomStatus.Available) ?? 0,
+                LowestAvailablePrice = h.Rooms?
+                    .Where(r => r.Status == RoomStatus.Available)
+                    .OrderBy(r => r.BasePrice)
+                    .FirstOrDefault()?.BasePrice
+            }).ToList();
+
+            return new PagedResultDto<HotelSearchResultDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = request.Page,
+                PageSize = request.PageSize
+            };
         }
     }
 }

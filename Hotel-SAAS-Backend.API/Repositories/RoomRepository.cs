@@ -116,5 +116,22 @@ namespace Hotel_SAAS_Backend.API.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
         }
+
+        public async Task<IEnumerable<Room>> GetAvailableRoomsByHotelAsync(Guid hotelId, List<Guid> excludeRoomIds)
+        {
+            return await _dbSet
+                .Include(r => r.Hotel)
+                .Include(r => r.Images)
+                .Include(r => r.Amenities)
+                    .ThenInclude(ra => ra.Amenity)
+                .AsNoTracking()
+                .Where(r =>
+                    r.HotelId == hotelId &&
+                    !r.IsDeleted &&
+                    r.Status == RoomStatus.Available &&
+                    !excludeRoomIds.Contains(r.Id))
+                .OrderBy(r => r.BasePrice)
+                .ToListAsync();
+        }
     }
 }
