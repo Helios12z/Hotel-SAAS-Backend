@@ -2,23 +2,23 @@
 
 ## ?? T?ng quan
 
-?ây là Implementation Plan ?? nâng c?p Hotel SAAS Backend thành m?t MVP hoàn ch?nh gi?ng Traveloka.
+?ï¿½y lï¿½ Implementation Plan ?? nï¿½ng c?p Hotel SAAS Backend thï¿½nh m?t MVP hoï¿½n ch?nh gi?ng Traveloka.
 
-**Nguyên t?c chính:**
-- MVP mindset: Làm ?? dùng, không over-engineer
+**Nguyï¿½n t?c chï¿½nh:**
+- MVP mindset: Lï¿½m ?? dï¿½ng, khï¿½ng over-engineer
 - Code ??n gi?n, d? ??c, d? maintain
-- Tuân th? convention hi?n t?i c?a project
-- M?i feature ph?i có test c? b?n
+- Tuï¿½n th? convention hi?n t?i c?a project
+- M?i feature ph?i cï¿½ test c? b?n
 
 ---
 
-## ??? Code Convention (B?t bu?c tuân th?)
+## ??? Code Convention (B?t bu?c tuï¿½n th?)
 
-### C?u trúc th? m?c
+### C?u trï¿½c th? m?c
 ```
 Hotel-SAAS-Backend.API/
 ??? Controllers/           # API endpoints - ch? handle HTTP, g?i Service
-??? Services/              # Business logic - x? lý nghi?p v?
+??? Services/              # Business logic - x? lï¿½ nghi?p v?
 ??? Repositories/          # Data access - LINQ queries
 ??? Interfaces/
 ?   ??? Services/          # IXxxService
@@ -34,7 +34,7 @@ Hotel-SAAS-Backend.API/
 ```
 
 ### Naming Convention
-| Lo?i | Convention | Ví d? |
+| Lo?i | Convention | Vï¿½ d? |
 |------|------------|-------|
 | Interface | `I` + PascalCase | `IHotelService`, `IBookingRepository` |
 | Service | PascalCase + `Service` | `BookingService`, `PromotionService` |
@@ -42,7 +42,7 @@ Hotel-SAAS-Backend.API/
 | Controller | PascalCase + `Controller` | `HotelsController` (s? nhi?u) |
 | DTO Request | `Create/Update` + Entity + `Dto` | `CreatePromotionDto` |
 | DTO Response | Entity + `Dto` / Entity + `DetailDto` | `PromotionDto`, `BookingDetailDto` |
-| Entity | PascalCase (s? ít) | `Promotion`, `Wishlist` |
+| Entity | PascalCase (s? ï¿½t) | `Promotion`, `Wishlist` |
 | Enum | PascalCase | `PromotionType`, `DiscountType` |
 
 ### Code Style
@@ -103,8 +103,8 @@ public class PromotionsController : ControllerBase
 ```
 
 ### Comment Rules
-- Code ng?n, t? gi?i thích ? KHÔNG comment
-- Code ph?c t?p, logic nghi?p v? ? Comment gi?i thích WHY, không ph?i WHAT
+- Code ng?n, t? gi?i thï¿½ch ? KHï¿½NG comment
+- Code ph?c t?p, logic nghi?p v? ? Comment gi?i thï¿½ch WHY, khï¿½ng ph?i WHAT
 - Region comments cho Mapper.cs: `#region Promotion Mappings`
 
 ---
@@ -112,7 +112,7 @@ public class PromotionsController : ControllerBase
 ## ?? Implementation Phases
 
 ### Phase 1: Search & Availability (P0 - Critical)
-**M?c tiêu:** User có th? search hotels và check room availability
+**M?c tiï¿½u:** User cï¿½ th? search hotels vï¿½ check room availability
 
 | Task | File | Priority |
 |------|------|----------|
@@ -129,7 +129,7 @@ public class PromotionsController : ControllerBase
 ---
 
 ### Phase 2: Promotions & Coupons (P1 - Important)
-**M?c tiêu:** H? th?ng khuy?n mãi và mã gi?m giá
+**M?c tiï¿½u:** H? th?ng khuy?n mï¿½i vï¿½ mï¿½ gi?m giï¿½
 
 | Task | File | Priority |
 |------|------|----------|
@@ -147,7 +147,7 @@ public class PromotionsController : ControllerBase
 ---
 
 ### Phase 3: Wishlist & Favorites (P1 - Important)
-**M?c tiêu:** User có th? save hotels yêu thích
+**M?c tiï¿½u:** User cï¿½ th? save hotels yï¿½u thï¿½ch
 
 | Task | File | Priority |
 |------|------|----------|
@@ -163,7 +163,7 @@ public class PromotionsController : ControllerBase
 ---
 
 ### Phase 4: Notifications (P1 - Important)
-**M?c tiêu:** G?i email notifications cho booking events
+**M?c tiï¿½u:** G?i email notifications cho booking events
 
 | Task | File | Priority |
 |------|------|----------|
@@ -180,7 +180,7 @@ public class PromotionsController : ControllerBase
 ---
 
 ### Phase 5: Dashboard & Analytics (P2 - Nice to have)
-**M?c tiêu:** Basic dashboard cho hotel managers
+**M?c tiï¿½u:** Basic dashboard cho hotel managers
 
 | Task | File | Priority |
 |------|------|----------|
@@ -197,13 +197,38 @@ public class PromotionsController : ControllerBase
 ---
 
 ### Phase 6: Guest Profile Enhancement (P2 - Nice to have)
-**M?c tiêu:** Nâng cao guest profile
+**M?c tiï¿½u:** Nï¿½ng cao guest profile
 
 | Task | File | Priority |
 |------|------|----------|
 | Booking history v?i filters | `BookingsController.cs` | P2 |
 | Recently viewed hotels | `RecentlyViewedService.cs` | P2 |
 | Guest preferences | `User.cs` enhancement | P2 |
+
+---
+
+### Phase 7: Dynamic Permission Module (P0 - Critical)
+**Muc tieu:** He thong phan quyen dong voi scope (Brand, Hotel) - SuperAdmin KHONG CRUD hotels!
+
+| Task | File | Priority |
+|------|------|----------|
+| Permission entities | `Models/Entities/Permission.cs` | P0 |
+| RolePermission mapping | `Models/Entities/RolePermission.cs` | P0 |
+| UserHotelPermission override | `Models/Entities/UserHotelPermission.cs` | P0 |
+| Permissions constants | `Models/Constants/Permissions.cs` | P0 |
+| PermissionService | `Services/PermissionService.cs` | P0 |
+| PermissionContext | `Services/PermissionContext.cs` | P0 |
+| Custom authorization handler | `Authorization/PermissionHandler.cs` | P0 |
+| Update JWT Service | `Services/JwtService.cs` | P0 |
+| Update Controllers | `HotelsController`, `UsersController` | P0 |
+| Seed permissions | `Data/SeedData.cs` | P0 |
+
+**Deliverables:**
+- Dynamic permission system thay the role-based cung
+- SuperAdmin chi quan ly he thong, khong CRUD hotels
+- BrandAdmin chi quan ly hotels trong brand cua minh
+- HotelManager chi quan ly hotel duoc assign
+- Scope-based data access
 
 ---
 
@@ -264,13 +289,14 @@ public async Task CreateBooking_WithValidData_ReturnsBookingDto()
 
 ## ?? Detailed Plans
 
-Xem các file plan chi ti?t:
+Xem cï¿½c file plan chi ti?t:
 1. [Phase 1: Search & Availability](./plans/PHASE1_SEARCH_AVAILABILITY.md)
 2. [Phase 2: Promotions & Coupons](./plans/PHASE2_PROMOTIONS.md)
 3. [Phase 3: Wishlist & Favorites](./plans/PHASE3_WISHLIST.md)
 4. [Phase 4: Notifications](./plans/PHASE4_NOTIFICATIONS.md)
 5. [Phase 5: Dashboard & Analytics](./plans/PHASE5_DASHBOARD.md)
 6. [Phase 6: Guest Profile](./plans/PHASE6_GUEST_PROFILE.md)
+7. [Phase 7: Dynamic Permission](./plans/PHASE7_DYNAMIC_PERMISSION.md)
 
 ---
 
@@ -321,3 +347,4 @@ git commit -m "feat: implement advanced hotel search with availability"
 | Phase 4: Notifications | ? Pending | - | - |
 | Phase 5: Dashboard | ? Pending | - | - |
 | Phase 6: Guest Profile | ? Pending | - | - |
+| Phase 7: Dynamic Permission | ? Pending | - | - |

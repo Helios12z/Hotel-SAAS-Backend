@@ -27,6 +27,18 @@ namespace Hotel_SAAS_Backend.API.Services
             return users.Select(Mapper.ToDto);
         }
 
+        public async Task<IEnumerable<UserDto>> GetUsersByBrandAsync(Guid brandId)
+        {
+            var users = await userRepository.GetByBrandAsync(brandId);
+            return users.Select(Mapper.ToDto);
+        }
+
+        public async Task<IEnumerable<UserDto>> GetUsersByHotelAsync(Guid hotelId)
+        {
+            var users = await userRepository.GetByHotelAsync(hotelId);
+            return users.Select(Mapper.ToDto);
+        }
+
         public async Task<UserDto> UpdateUserAsync(Guid id, UpdateUserDto updateUserDto)
         {
             var user = await userRepository.GetByIdAsync(id);

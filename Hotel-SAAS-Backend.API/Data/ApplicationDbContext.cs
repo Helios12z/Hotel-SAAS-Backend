@@ -72,6 +72,11 @@ namespace Hotel_SAAS_Backend.API.Data
         public DbSet<HotelOnboarding> HotelOnboardings { get; set; }
         public DbSet<OnboardingDocument> OnboardingDocuments { get; set; }
 
+        // Permissions
+        public DbSet<Permission> Permissions { get; set; }
+        public DbSet<RolePermission> RolePermissions { get; set; }
+        public DbSet<UserHotelPermission> UserHotelPermissions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -754,6 +759,50 @@ namespace Hotel_SAAS_Backend.API.Data
                     .WithMany()
                     .HasForeignKey(e => e.ReviewedById)
                     .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // Permission Configuration
+            modelBuilder.Entity<Permission>(entity =>
+            {
+                entity.ToTable("permissions");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.Property(e => e.Resource).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Action).IsRequired().HasMaxLength(50);
+                entity.HasIndex(e => e.Name).IsUnique();
+                entity.HasIndex(e => e.Resource);
+            });
+
+            // RolePermission Configuration
+            modelBuilder.Entity<RolePermission>(entity =>
+            {
+                entity.ToTable("role_permissions");
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => new { e.Role, e.PermissionId }).IsUnique();
+
+                entity.HasOne(e => e.Permission)
+                    .WithMany(p => p.RolePermissions)
+                    .HasForeignKey(e => e.PermissionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // UserHotelPermission Configuration
+            modelBuilder.Entity<UserHotelPermission>(entity =>
+            {
+                entity.ToTable("user_hotel_permissions");
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => new { e.UserId, e.HotelId, e.PermissionId }).IsUnique();
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Permission)
+                    .WithMany(p => p.UserHotelPermissions)
+                    .HasForeignKey(e => e.PermissionId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

@@ -3,6 +3,17 @@ using Hotel_SAAS_Backend.API.Models.Enums;
 namespace Hotel_SAAS_Backend.API.Models.DTOs
 {
     // Request DTOs
+    public class CreateUserDto
+    {
+        public string Email { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string? PhoneNumber { get; set; }
+        public UserRole Role { get; set; }
+        public Guid? BrandId { get; set; }  // Required for BrandAdmin, HotelManager
+        public Guid? HotelId { get; set; }  // Required for HotelManager, Receptionist, Staff
+    }
+
     public class UpdateUserDto
     {
         public string? FirstName { get; set; }

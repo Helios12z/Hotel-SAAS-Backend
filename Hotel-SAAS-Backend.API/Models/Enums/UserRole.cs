@@ -6,6 +6,7 @@ namespace Hotel_SAAS_Backend.API.Models.Enums
         BrandAdmin = 1,
         HotelManager = 2,
         Receptionist = 3,
-        Guest = 4
+        Staff = 4,
+        Guest = 5
     }
 }

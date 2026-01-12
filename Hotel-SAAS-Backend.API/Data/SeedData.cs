@@ -1,3 +1,4 @@
+using Hotel_SAAS_Backend.API.Models.Constants;
 using Hotel_SAAS_Backend.API.Models.Entities;
 using Hotel_SAAS_Backend.API.Models.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -740,6 +741,135 @@ namespace Hotel_SAAS_Backend.API.Data
             };
 
             await context.SubscriptionPlans.AddRangeAsync(plans);
+            await context.SaveChangesAsync();
+
+            // ============================================
+            // 13. SEED PERMISSIONS & ROLE PERMISSIONS
+            // ============================================
+            await SeedPermissionsAsync(context);
+        }
+
+        /// <summary>
+        /// Seed default permissions and role-permission mappings
+        /// </summary>
+        private static async Task SeedPermissionsAsync(ApplicationDbContext context)
+        {
+            if (await context.Permissions.AnyAsync())
+            {
+                return; // Permissions already seeded
+            }
+
+            // Seed Permissions
+            var permissions = new List<Permission>
+            {
+                // Hotels
+                new() { Name = Permissions.Hotels.Create, Description = "Create hotels", Resource = "hotels", Action = "create" },
+                new() { Name = Permissions.Hotels.Read, Description = "View hotels", Resource = "hotels", Action = "read" },
+                new() { Name = Permissions.Hotels.Update, Description = "Update hotels", Resource = "hotels", Action = "update" },
+                new() { Name = Permissions.Hotels.Delete, Description = "Delete hotels", Resource = "hotels", Action = "delete" },
+
+                // Rooms
+                new() { Name = Permissions.Rooms.Create, Description = "Create rooms", Resource = "rooms", Action = "create" },
+                new() { Name = Permissions.Rooms.Read, Description = "View rooms", Resource = "rooms", Action = "read" },
+                new() { Name = Permissions.Rooms.Update, Description = "Update rooms", Resource = "rooms", Action = "update" },
+                new() { Name = Permissions.Rooms.Delete, Description = "Delete rooms", Resource = "rooms", Action = "delete" },
+
+                // Bookings
+                new() { Name = Permissions.Bookings.Create, Description = "Create bookings", Resource = "bookings", Action = "create" },
+                new() { Name = Permissions.Bookings.Read, Description = "View bookings", Resource = "bookings", Action = "read" },
+                new() { Name = Permissions.Bookings.Update, Description = "Update bookings", Resource = "bookings", Action = "update" },
+                new() { Name = Permissions.Bookings.Delete, Description = "Delete bookings", Resource = "bookings", Action = "delete" },
+                new() { Name = Permissions.Bookings.CheckIn, Description = "Check-in guests", Resource = "bookings", Action = "checkin" },
+                new() { Name = Permissions.Bookings.CheckOut, Description = "Check-out guests", Resource = "bookings", Action = "checkout" },
+
+                // Users
+                new() { Name = Permissions.Users.Create, Description = "Create users", Resource = "users", Action = "create" },
+                new() { Name = Permissions.Users.Read, Description = "View users", Resource = "users", Action = "read" },
+                new() { Name = Permissions.Users.Update, Description = "Update users", Resource = "users", Action = "update" },
+                new() { Name = Permissions.Users.Delete, Description = "Delete users", Resource = "users", Action = "delete" },
+
+                // Brands
+                new() { Name = Permissions.Brands.Create, Description = "Create brands", Resource = "brands", Action = "create" },
+                new() { Name = Permissions.Brands.Read, Description = "View brands", Resource = "brands", Action = "read" },
+                new() { Name = Permissions.Brands.Update, Description = "Update brands", Resource = "brands", Action = "update" },
+                new() { Name = Permissions.Brands.Delete, Description = "Delete brands", Resource = "brands", Action = "delete" },
+
+                // Subscriptions
+                new() { Name = Permissions.Subscriptions.Read, Description = "View subscriptions", Resource = "subscriptions", Action = "read" },
+                new() { Name = Permissions.Subscriptions.Update, Description = "Update subscriptions", Resource = "subscriptions", Action = "update" },
+
+                // Dashboard
+                new() { Name = Permissions.Dashboard.View, Description = "View dashboard", Resource = "dashboard", Action = "view" },
+                new() { Name = Permissions.Dashboard.ViewAll, Description = "View all dashboards", Resource = "dashboard", Action = "viewall" }
+            };
+
+            await context.Permissions.AddRangeAsync(permissions);
+            await context.SaveChangesAsync();
+
+            // Seed Role-Permission mappings
+            var rolePermissions = new List<RolePermission>();
+
+            // SuperAdmin - All system permissions (not hotel-specific)
+            var superAdminPermissions = permissions
+                .Where(p => p.Resource != "hotel")
+                .Select(p => new RolePermission { Role = UserRole.SuperAdmin, PermissionId = p.Id });
+            rolePermissions.AddRange(superAdminPermissions);
+
+            // BrandAdmin - Hotels, Users within brand
+            rolePermissions.AddRange(new[]
+            {
+                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Brands.Read).Id },
+                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Hotels.Create).Id },
+                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Hotels.Read).Id },
+                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Hotels.Update).Id },
+                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Hotels.Delete).Id },
+                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Users.Create).Id },
+                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Users.Read).Id },
+                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Users.Update).Id },
+                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Users.Delete).Id },
+                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Dashboard.View).Id }
+            });
+
+            // HotelManager - Rooms, Bookings within assigned hotel
+            rolePermissions.AddRange(new[]
+            {
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Hotels.Read).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Rooms.Create).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Rooms.Read).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Rooms.Update).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Rooms.Delete).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Bookings.Create).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Bookings.Read).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Bookings.Update).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Bookings.Delete).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Bookings.CheckIn).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Bookings.CheckOut).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Users.Create).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Users.Read).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Users.Update).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Users.Delete).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Dashboard.View).Id }
+            });
+
+            // Receptionist - Check-in/out and read access
+            rolePermissions.AddRange(new[]
+            {
+                new RolePermission { Role = UserRole.Receptionist, PermissionId = permissions.First(p => p.Name == Permissions.Hotels.Read).Id },
+                new RolePermission { Role = UserRole.Receptionist, PermissionId = permissions.First(p => p.Name == Permissions.Rooms.Read).Id },
+                new RolePermission { Role = UserRole.Receptionist, PermissionId = permissions.First(p => p.Name == Permissions.Bookings.Read).Id },
+                new RolePermission { Role = UserRole.Receptionist, PermissionId = permissions.First(p => p.Name == Permissions.Bookings.CheckIn).Id },
+                new RolePermission { Role = UserRole.Receptionist, PermissionId = permissions.First(p => p.Name == Permissions.Bookings.CheckOut).Id }
+            });
+
+            // Staff - Read only
+            rolePermissions.AddRange(new[]
+            {
+                new RolePermission { Role = UserRole.Staff, PermissionId = permissions.First(p => p.Name == Permissions.Hotels.Read).Id },
+                new RolePermission { Role = UserRole.Staff, PermissionId = permissions.First(p => p.Name == Permissions.Rooms.Read).Id },
+                new RolePermission { Role = UserRole.Staff, PermissionId = permissions.First(p => p.Name == Permissions.Bookings.Read).Id }
+            });
+
+            await context.RolePermissions.AddRangeAsync(rolePermissions);
             await context.SaveChangesAsync();
         }
 

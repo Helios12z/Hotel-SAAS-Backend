@@ -1,4 +1,5 @@
 using System.Text;
+using Hotel_SAAS_Backend.API.Authorization;
 using Hotel_SAAS_Backend.API.Data;
 using Hotel_SAAS_Backend.API.Interfaces.Repositories;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
@@ -9,6 +10,7 @@ using Hotel_SAAS_Backend.API.Services.AI;
 using Hotel_SAAS_Backend.API.Services.Embedding;
 using Hotel_SAAS_Backend.API.Services.LLM;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -72,6 +74,14 @@ if (jwtOptions != null)
 
 builder.Services.AddAuthorization();
 
+// Authorization - Permission Policy Provider
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
+
+// Permission Context (scoped service)
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<PermissionContext>();
+
 // CORS Configuration
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:3000" };
 builder.Services.AddCors(options =>
@@ -134,6 +144,9 @@ builder.Services.AddScoped<IGuestProfileService, GuestProfileService>();
 builder.Services.AddScoped<ISubscriptionPlanService, SubscriptionPlanService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IHotelOnboardingService, HotelOnboardingService>();
+
+// Permission Services
+builder.Services.AddScoped<IPermissionService, PermissionService>();
 
 // AI Services Registration
 builder.Services.AddHttpClient<IEmbedderService, OllamaEmbedderService>();
