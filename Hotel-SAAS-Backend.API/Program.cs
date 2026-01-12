@@ -144,6 +144,7 @@ builder.Services.AddScoped<IGuestProfileService, GuestProfileService>();
 builder.Services.AddScoped<ISubscriptionPlanService, SubscriptionPlanService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IHotelOnboardingService, HotelOnboardingService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 
 // Permission Services
 builder.Services.AddScoped<IPermissionService, PermissionService>();

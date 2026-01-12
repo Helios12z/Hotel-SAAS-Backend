@@ -55,5 +55,15 @@ namespace Hotel_SAAS_Backend.API.Models.Constants
             public const string View = "dashboard.view";
             public const string ViewAll = "dashboard.viewall";
         }
+
+        public static class Reports
+        {
+            public const string Revenue = "reports.revenue";
+            public const string Bookings = "reports.bookings";
+            public const string Occupancy = "reports.occupancy";
+            public const string Inventory = "reports.inventory";
+            public const string Hotel = "reports.hotel";
+            public const string Export = "reports.export";
+        }
     }
 }

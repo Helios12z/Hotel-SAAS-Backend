@@ -800,7 +800,15 @@ namespace Hotel_SAAS_Backend.API.Data
 
                 // Dashboard
                 new() { Name = Permissions.Dashboard.View, Description = "View dashboard", Resource = "dashboard", Action = "view" },
-                new() { Name = Permissions.Dashboard.ViewAll, Description = "View all dashboards", Resource = "dashboard", Action = "viewall" }
+                new() { Name = Permissions.Dashboard.ViewAll, Description = "View all dashboards", Resource = "dashboard", Action = "viewall" },
+
+                // Reports
+                new() { Name = Permissions.Reports.Revenue, Description = "View revenue reports", Resource = "reports", Action = "revenue" },
+                new() { Name = Permissions.Reports.Bookings, Description = "View bookings reports", Resource = "reports", Action = "bookings" },
+                new() { Name = Permissions.Reports.Occupancy, Description = "View occupancy reports", Resource = "reports", Action = "occupancy" },
+                new() { Name = Permissions.Reports.Inventory, Description = "View inventory reports", Resource = "reports", Action = "inventory" },
+                new() { Name = Permissions.Reports.Hotel, Description = "View full hotel reports", Resource = "reports", Action = "hotel" },
+                new() { Name = Permissions.Reports.Export, Description = "Export reports", Resource = "reports", Action = "export" }
             };
 
             await context.Permissions.AddRangeAsync(permissions);
@@ -827,7 +835,13 @@ namespace Hotel_SAAS_Backend.API.Data
                 new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Users.Read).Id },
                 new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Users.Update).Id },
                 new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Users.Delete).Id },
-                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Dashboard.View).Id }
+                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Dashboard.View).Id },
+                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Reports.Revenue).Id },
+                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Reports.Bookings).Id },
+                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Reports.Occupancy).Id },
+                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Reports.Inventory).Id },
+                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Reports.Hotel).Id },
+                new RolePermission { Role = UserRole.BrandAdmin, PermissionId = permissions.First(p => p.Name == Permissions.Reports.Export).Id }
             });
 
             // HotelManager - Rooms, Bookings within assigned hotel
@@ -848,7 +862,13 @@ namespace Hotel_SAAS_Backend.API.Data
                 new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Users.Read).Id },
                 new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Users.Update).Id },
                 new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Users.Delete).Id },
-                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Dashboard.View).Id }
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Dashboard.View).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Reports.Revenue).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Reports.Bookings).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Reports.Occupancy).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Reports.Inventory).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Reports.Hotel).Id },
+                new RolePermission { Role = UserRole.HotelManager, PermissionId = permissions.First(p => p.Name == Permissions.Reports.Export).Id }
             });
 
             // Receptionist - Check-in/out and read access
