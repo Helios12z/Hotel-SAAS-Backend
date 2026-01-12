@@ -1,14 +1,38 @@
 # Module 08: Room Management (Partner Portal)
 
+## Authorization & Permissions
+
+> **Hệ thống phân quyền động**: Sử dụng `[Authorize(Policy = "Permission:xxx")]` thay vì role-based cứng
+
+### Permission Policies
+
+| Policy | Mô tả | Cho phép |
+|--------|-------|----------|
+| `Permission:rooms.read` | Xem rooms | Tất cả staff của hotel |
+| `Permission:rooms.create` | Tạo room mới | HotelManager |
+| `Permission:rooms.update` | Cập nhật room | HotelManager |
+| `Permission:rooms.delete` | Xóa room | HotelManager |
+
+### Role-Based Access Matrix
+
+| Action | SuperAdmin | BrandAdmin | HotelManager | Receptionist | Staff |
+|--------|------------|------------|--------------|--------------|-------|
+| Xem rooms | ❌ | ❌ | ✅ (own) | ✅ (own) | ✅ (own) |
+| Tạo room | ❌ | ❌ | ✅ | ❌ | ❌ |
+| Sửa room | ❌ | ❌ | ✅ | ❌ | ❌ |
+| Xóa room | ❌ | ❌ | ✅ | ❌ | ❌ |
+
+---
+
 ## Screens
 
-| Screen | Route | M� t? |
+| Screen | Route | M� t? |
 |--------|-------|-------|
-| Rooms List | `/manage/hotels/[id]/rooms` | Danh s�ch ph�ng |
+| Rooms List | `/manage/hotels/[id]/rooms` | Danh s�ch ph�ng |
 | Room Detail | `/manage/hotels/[id]/rooms/[roomId]` | Chi ti?t & ch?nh s?a |
-| Add Room | `/manage/hotels/[id]/rooms/new` | Th�m ph�ng m?i |
-| Bulk Add | `/manage/hotels/[id]/rooms/bulk-add` | Th�m nhi?u ph�ng |
-| Pricing | `/manage/hotels/[id]/rooms/[roomId]/pricing` | Qu?n l� gi� |
+| Add Room | `/manage/hotels/[id]/rooms/new` | Th�m ph�ng m?i |
+| Bulk Add | `/manage/hotels/[id]/rooms/bulk-add` | Th�m nhi?u ph�ng |
+| Pricing | `/manage/hotels/[id]/rooms/[roomId]/pricing` | Qu?n l� gi� |
 | Availability | `/manage/hotels/[id]/rooms/availability` | Calendar availability |
 
 ---
@@ -20,9 +44,10 @@
 GET /api/hotels/{hotelId}/rooms
 Authorization: Bearer {token}
 ```
+**Required Policy:** `Permission:rooms.read`
 
 **Query Parameters:**
-| Param | Type | Default | M� t? |
+| Param | Type | Default | M� t? |
 |-------|------|---------|-------|
 | `type` | string | - | Filter by room type |
 | `status` | string | - | `Available`, `Occupied`, `Maintenance` |
@@ -61,6 +86,7 @@ Authorization: Bearer {token}
 GET /api/rooms/{id}
 Authorization: Bearer {token}
 ```
+**Required Policy:** `Permission:rooms.read`
 
 **Response:**
 ```json
@@ -234,7 +260,7 @@ Authorization: Bearer {token}
 ```
 
 **Query Parameters:**
-| Param | Type | M� t? |
+| Param | Type | M� t? |
 |-------|------|-------|
 | `startDate` | date | Start of range |
 | `endDate` | date | End of range |
@@ -327,6 +353,130 @@ Authorization: Bearer {token}
 
 ---
 
+## Room Status Management API
+
+### 14. Get Rooms by Status
+```http
+GET /api/hotels/{hotelId}/rooms/status/{status}
+Authorization: Bearer {token}
+```
+**Status values:** `Available`, `Occupied`, `Maintenance`, `Cleaning`, `OutOfOrder`, `Reserved`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "roomNumber": "301",
+      "type": "Deluxe",
+      "status": "Maintenance",
+      "floor": 3
+    }
+  ]
+}
+```
+
+### 15. Get Maintenance Rooms
+```http
+GET /api/hotels/{hotelId}/rooms/maintenance
+Authorization: Bearer {token}
+```
+Lấy tất cả rooms cần bảo trì (Maintenance, Cleaning, OutOfOrder)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "maintenance": [
+      { "id": "uuid", "roomNumber": "301", "status": "Maintenance", "issue": "AC repair" }
+    ],
+    "cleaning": [
+      { "id": "uuid", "roomNumber": "302", "status": "Cleaning" }
+    ],
+    "outOfOrder": [
+      { "id": "uuid", "roomNumber": "303", "status": "OutOfOrder", "reason": "Renovations" }
+    ]
+  }
+}
+```
+
+### 16. Report Room Maintenance
+```http
+POST /api/hotels/{hotelId}/rooms/{id}/maintenance
+Authorization: Bearer {token}
+```
+Báo cáo room cần bảo trì/dọn dẹp
+
+**Request:**
+```json
+{
+  "issue": "Plumbing",  // Plumbing, Electrical, Cleaning, Damages, Other
+  "description": "Bathroom pipe leak",
+  "priority": "High",   // Low, Medium, High, Urgent
+  "reportedBy": "Front Desk"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Maintenance reported successfully",
+  "data": {
+    "roomId": "uuid",
+    "newStatus": "Maintenance",
+    "ticketId": "TKT-001"
+  }
+}
+```
+
+### 17. Mark Room Available (Ready after cleaning)
+```http
+PATCH /api/hotels/{hotelId}/rooms/{id}/available
+Authorization: Bearer {token}
+```
+Đánh dấu room sẵn sàng sau khi dọn dẹp/bảo trì
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Room marked as available",
+  "data": {
+    "id": "uuid",
+    "roomNumber": "301",
+    "status": "Available"
+  }
+}
+```
+
+### 18. Get Room Status Summary
+```http
+GET /api/hotels/{hotelId}/rooms/status-summary
+Authorization: Bearer {token}
+```
+Lấy tổng quan trạng thái tất cả rooms
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "totalRooms": 120,
+    "available": 85,
+    "occupied": 25,
+    "maintenance": 3,
+    "cleaning": 5,
+    "outOfOrder": 2
+  }
+}
+```
+
+---
+
 ## Screen Specifications
 
 ### Rooms List Screen
@@ -339,21 +489,21 @@ Authorization: Bearer {token}
 ????????????????????????????????????????????????????
 ?  ?????????????????????????????????????????????? ?
 ?  ? #301 ? Deluxe King          ? Available   ? ?
-?  ?      ? ?? 2 max � ??? King � 35m�          ? ?
-?  ?      ? 2,500,000 VND / ?�m                ? ?
-?  ?      ?                      [Edit] [���]  ? ?
+?  ?      ? ?? 2 max � ??? King � 35m�          ? ?
+?  ?      ? 2,500,000 VND / ?�m                ? ?
+?  ?      ?                      [Edit] [���]  ? ?
 ?  ?????????????????????????????????????????????? ?
 ?  ?????????????????????????????????????????????? ?
 ?  ? #302 ? Deluxe King          ? Occupied    ? ?
-?  ?      ? ?? 2 max � ??? King � 35m�          ? ?
+?  ?      ? ?? 2 max � ??? King � 35m�          ? ?
 ?  ?      ? Guest: John Doe (Feb 1-3)          ? ?
-?  ?      ?                      [View] [���]  ? ?
+?  ?      ?                      [View] [���]  ? ?
 ?  ?????????????????????????????????????????????? ?
 ?  ?????????????????????????????????????????????? ?
 ?  ? #303 ? Deluxe King          ? Maintenance ? ?
-?  ?      ? ?? 2 max � ??? King � 35m�          ? ?
+?  ?      ? ?? 2 max � ??? King � 35m�          ? ?
 ?  ?      ? AC repair until Feb 20             ? ?
-?  ?      ?                      [Edit] [���]  ? ?
+?  ?      ?                      [Edit] [���]  ? ?
 ?  ?????????????????????????????????????????????? ?
 ?                                                  ?
 ?  ??? Floor 4 ??????????????????????????????????  ?
@@ -379,7 +529,7 @@ Authorization: Bearer {token}
 ?  ? Deluxe        ?  ? ? King             ?   ?  ?
 ?  ???????????????????? ????????????????????????  ?
 ?  ???????????????????? ????????????????????????  ?
-?  ? Number of Beds   ? ? Size (m�)            ?  ?
+?  ? Number of Beds   ? ? Size (m�)            ?  ?
 ?  ? 1                ? ? 35                   ?  ?
 ?  ???????????????????? ????????????????????????  ?
 ?                                                  ?

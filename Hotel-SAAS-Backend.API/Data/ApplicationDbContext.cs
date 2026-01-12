@@ -77,6 +77,9 @@ namespace Hotel_SAAS_Backend.API.Data
         public DbSet<RolePermission> RolePermissions { get; set; }
         public DbSet<UserHotelPermission> UserHotelPermissions { get; set; }
 
+        // Additional Charges (Late checkout, minibar, etc.)
+        public DbSet<AdditionalCharge> AdditionalCharges { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -104,6 +107,13 @@ namespace Hotel_SAAS_Backend.API.Data
                 entity.Property(e => e.PhoneNumber).HasMaxLength(50);
                 entity.Property(e => e.Website).HasMaxLength(500);
                 entity.Property(e => e.StarRating).HasDefaultValue(3);
+                entity.Property(e => e.CheckInTime).HasMaxLength(5).HasDefaultValue("14:00");
+                entity.Property(e => e.CheckOutTime).HasMaxLength(5).HasDefaultValue("12:00");
+                entity.Property(e => e.StripeAccountId).HasMaxLength(100);
+                entity.Property(e => e.TaxRate).HasPrecision(5, 4).HasDefaultValue(0.10m);
+                entity.Property(e => e.ServiceFeeRate).HasPrecision(5, 4).HasDefaultValue(0.05m);
+                entity.Property(e => e.ExtraBedPrice).HasPrecision(18, 2);
+                entity.Property(e => e.CommissionRate).HasPrecision(5, 2);
                 entity.HasIndex(e => e.BrandId);
                 entity.HasIndex(e => e.City);
                 entity.HasIndex(e => e.Country);
@@ -802,6 +812,21 @@ namespace Hotel_SAAS_Backend.API.Data
                 entity.HasOne(e => e.Permission)
                     .WithMany(p => p.UserHotelPermissions)
                     .HasForeignKey(e => e.PermissionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // AdditionalCharge Configuration
+            modelBuilder.Entity<AdditionalCharge>(entity =>
+            {
+                entity.ToTable("additional_charges");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Type).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.Property(e => e.Amount).HasPrecision(18, 2);
+
+                entity.HasOne(e => e.Booking)
+                    .WithMany(b => b.AdditionalCharges)
+                    .HasForeignKey(e => e.BookingId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
         }

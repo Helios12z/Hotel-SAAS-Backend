@@ -15,5 +15,11 @@ namespace Hotel_SAAS_Backend.API.Interfaces.Services
         Task<bool> DeleteRoomAsync(Guid id);
         Task<bool> UpdateRoomStatusAsync(Guid id, RoomStatus status);
         Task<HotelAvailabilityDto?> CheckAvailabilityAsync(Guid hotelId, RoomAvailabilityRequestDto request);
+
+        // ============ Room Status & Maintenance ============
+        Task<IEnumerable<RoomDto>> GetRoomsByStatusAsync(Guid hotelId, RoomStatus status);
+        Task<bool> ReportRoomMaintenanceAsync(Guid roomId, RoomMaintenanceReportDto report);
+        Task<IEnumerable<RoomDto>> GetMaintenanceRoomsAsync(Guid hotelId);
+        Task<RoomDto> MarkRoomAvailableAsync(Guid roomId);
     }
 }

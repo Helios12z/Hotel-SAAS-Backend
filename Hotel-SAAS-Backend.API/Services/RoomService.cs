@@ -87,7 +87,7 @@ namespace Hotel_SAAS_Backend.API.Services
             var bookedRoomIds = await bookingRepository.GetBookedRoomIdsAsync(
                 hotelId, request.CheckInDate, request.CheckOutDate);
 
-            // Get available rooms
+            // Get available rooms (already filters by RoomStatus.Available)
             var availableRooms = await roomRepository.GetAvailableRoomsByHotelAsync(hotelId, bookedRoomIds);
 
             // Filter by guest capacity if specified
@@ -123,6 +123,51 @@ namespace Hotel_SAAS_Backend.API.Services
                 TotalAvailableRooms = roomDtos.Count,
                 LowestPrice = roomDtos.Any() ? roomDtos.Min(r => r.TotalPrice) : null
             };
+        }
+
+        // ============ Room Status & Maintenance ============
+
+        public async Task<IEnumerable<RoomDto>> GetRoomsByStatusAsync(Guid hotelId, RoomStatus status)
+        {
+            var rooms = await roomRepository.GetByHotelAsync(hotelId, null, status);
+            return rooms.Select(Mapper.ToDto);
+        }
+
+        public async Task<bool> ReportRoomMaintenanceAsync(Guid roomId, RoomMaintenanceReportDto report)
+        {
+            var room = await roomRepository.GetByIdAsync(roomId);
+            if (room == null) return false;
+
+            // Update room status based on issue type
+            room.Status = report.Issue.ToLowerInvariant() switch
+            {
+                "cleaning" => RoomStatus.Cleaning,
+                "damages" => RoomStatus.OutOfOrder,
+                _ => RoomStatus.Maintenance
+            };
+
+            await roomRepository.UpdateAsync(room);
+            return true;
+        }
+
+        public async Task<IEnumerable<RoomDto>> GetMaintenanceRoomsAsync(Guid hotelId)
+        {
+            var maintenanceStatuses = new[] { RoomStatus.Maintenance, RoomStatus.Cleaning, RoomStatus.OutOfOrder };
+            var rooms = await roomRepository.GetByHotelAsync(hotelId);
+
+            return rooms
+                .Where(r => maintenanceStatuses.Contains(r.Status))
+                .Select(Mapper.ToDto);
+        }
+
+        public async Task<RoomDto> MarkRoomAvailableAsync(Guid roomId)
+        {
+            var room = await roomRepository.GetByIdAsync(roomId);
+            if (room == null) throw new Exception("Room not found");
+
+            room.Status = RoomStatus.Available;
+            var updatedRoom = await roomRepository.UpdateAsync(room);
+            return Mapper.ToDto(updatedRoom);
         }
     }
 }

@@ -1,13 +1,52 @@
 # Module 09: Booking Management (Partner Portal)
 
+## Authorization & Permissions
+
+> **Hệ thống phân quyền động**: Sử dụng `[Authorize(Policy = "Permission:xxx")]` thay vì role-based cứng
+
+### Permission Policies
+
+| Policy | Mô tả | Cho phép |
+|--------|-------|----------|
+| `Permission:bookings.read` | Xem bookings | Tất cả staff của hotel |
+| `Permission:bookings.create` | Tạo booking (walk-in) | HotelManager |
+| `Permission:bookings.update` | Sửa booking | HotelManager |
+| `Permission:bookings.delete` | Hủy booking | HotelManager |
+| `Permission:bookings.checkin` | Check-in khách | HotelManager, Receptionist |
+| `Permission:bookings.checkout` | Check-out khách | HotelManager, Receptionist |
+
+### Role-Based Access Matrix
+
+| Action | SuperAdmin | BrandAdmin | HotelManager | Receptionist | Staff |
+|--------|------------|------------|--------------|--------------|-------|
+| Xem bookings | Read (all) | Read (own) | Read (own) | Read (own) | Read (own) |
+| Tạo booking | ❌ | ❌ | ✅ | ❌ | ❌ |
+| Check-in | ❌ | ❌ | ✅ | ✅ | ❌ |
+| Check-out | ❌ | ❌ | ✅ | ✅ | ❌ |
+| Hủy booking | ❌ | ❌ | ✅ | ❌ | ❌ |
+
+### JWT Claims
+
+Token chứa các claims liên quan đến permissions:
+```json
+{
+  "permissions": "hotels.read,bookings.read,bookings.checkin,...",
+  "scope": "hotel",
+  "hotelId": "uuid-cua-hotel-duoc-assign",
+  "brandId": "uuid-cua-brand-neu-co"
+}
+```
+
+---
+
 ## Screens
 
-| Screen | Route | M� t? |
+| Screen | Route | M� t? |
 |--------|-------|-------|
-| Bookings List | `/manage/bookings` | Danh s�ch t?t c? bookings |
+| Bookings List | `/manage/bookings` | Danh s�ch t?t c? bookings |
 | Booking Detail | `/manage/bookings/[id]` | Chi ti?t booking |
-| Today's Arrivals | `/manage/bookings/arrivals` | Check-in h�m nay |
-| Today's Departures | `/manage/bookings/departures` | Check-out h�m nay |
+| Today's Arrivals | `/manage/bookings/arrivals` | Check-in h�m nay |
+| Today's Departures | `/manage/bookings/departures` | Check-out h�m nay |
 | Create Booking | `/manage/bookings/new` | T?o booking m?i (walk-in) |
 
 ---
@@ -19,9 +58,10 @@
 GET /api/hotels/{hotelId}/bookings
 Authorization: Bearer {token}
 ```
+**Required Policy:** `Permission:bookings.read`
 
 **Query Parameters:**
-| Param | Type | Default | M� t? |
+| Param | Type | Default | M� t? |
 |-------|------|---------|-------|
 | `status` | string | - | `Pending`, `Confirmed`, `CheckedIn`, etc. |
 | `fromDate` | date | - | Filter from date |
@@ -129,6 +169,7 @@ Authorization: Bearer {token}
 POST /api/bookings/{id}/check-in
 Authorization: Bearer {token}
 ```
+**Required Policy:** `Permission:bookings.checkin`
 
 **Request:**
 ```json
@@ -160,6 +201,7 @@ Authorization: Bearer {token}
 POST /api/bookings/{id}/check-out
 Authorization: Bearer {token}
 ```
+**Required Policy:** `Permission:bookings.checkout`
 
 **Request:**
 ```json
@@ -198,6 +240,7 @@ Authorization: Bearer {token}
 POST /api/bookings/{id}/cancel
 Authorization: Bearer {token}
 ```
+**Required Policy:** `Permission:bookings.delete`
 
 **Request:**
 ```json
@@ -252,6 +295,7 @@ Authorization: Bearer {token}
 POST /api/hotels/{hotelId}/bookings
 Authorization: Bearer {token}
 ```
+**Required Policy:** `Permission:bookings.create`
 
 **Request:**
 ```json
@@ -323,7 +367,287 @@ Authorization: Bearer {token}
 
 ---
 
-## TypeScript Types
+## Change Room API
+
+### 13. Change Room (Đổi phòng cho guest đang ở)
+```http
+POST /api/bookings/{id}/change-room
+Authorization: Bearer {token}
+```
+Chỉ áp dụng cho bookings đã **CheckedIn**
+
+**Request:**
+```json
+{
+  "oldRoomId": "uuid-cua-phong-cu",
+  "newRoomId": "uuid-cua-phong-moi",
+  "reason": "AC not working, moved to higher floor"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Room changed successfully",
+  "data": {
+    "bookingId": "uuid",
+    "oldRoom": { "id": "uuid", "roomNumber": "301", "type": "Deluxe" },
+    "newRoom": { "id": "uuid", "roomNumber": "401", "type": "Deluxe" },
+    "priceDifference": 500000,
+    "newTotalAmount": 7350000
+  }
+}
+```
+
+---
+
+## Late Checkout API
+
+### 14. Calculate Late Checkout Fee (Tính phụ phí trước khi xác nhận)
+```http
+POST /api/bookings/{id}/late-checkout/calculate
+Authorization: Bearer {token}
+```
+Tính phụ phí late checkout mà không lưu vào hệ thống
+
+**Request:**
+```json
+{
+  "newCheckOutTime": "2024-02-03T15:00:00Z",
+  "reason": "Guest requested late checkout"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "lateFeeAmount": 250000,
+    "extraHours": 3,
+    "hourlyRate": 83333,
+    "originalCheckOut": "2024-02-03T12:00:00Z",
+    "newCheckOut": "2024-02-03T15:00:00Z",
+    "originalTotal": 6850000,
+    "newTotal": 7100000
+  }
+}
+```
+
+**Cách tính phụ phí:**
+- 10% giá phòng/giờ
+- Tối đa 50% giá phòng/ngày
+- Tối thiểu 1 giờ, tối đa 24 giờ
+
+### 15. Process Late Checkout (Xác nhận late checkout)
+```http
+POST /api/bookings/{id}/late-checkout
+Authorization: Bearer {token}
+```
+Xác nhận late checkout và thêm phụ phí vào booking
+
+**Request:**
+```json
+{
+  "newCheckOutTime": "2024-02-03T15:00:00Z",
+  "reason": "Guest requested late checkout"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Late checkout processed successfully",
+  "data": {
+    "bookingId": "uuid",
+    "newCheckOutTime": "2024-02-03T15:00:00Z",
+    "lateFeeAmount": 250000,
+    "extraHours": 3,
+    "newTotalAmount": 7100000
+  }
+}
+```
+
+---
+
+## Additional Charges API
+
+### 16. Get Additional Charges (Lấy danh sách phụ phí)
+```http
+GET /api/bookings/{id}/charges
+Authorization: Bearer {token}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "type": "LateCheckout",
+      "description": "Late checkout fee: 15:00 (3 hours late)",
+      "amount": 250000,
+      "isPaid": false,
+      "paidAt": null,
+      "paymentMethod": null,
+      "createdAt": "2024-02-03T11:00:00Z"
+    },
+    {
+      "id": "uuid",
+      "type": "Minibar",
+      "description": "Minibar consumption",
+      "amount": 625000,
+      "isPaid": true,
+      "paidAt": "2024-02-03T11:30:00Z",
+      "paymentMethod": "Cash",
+      "createdAt": "2024-02-02T20:00:00Z"
+    },
+    {
+      "id": "uuid",
+      "type": "RoomService",
+      "description": "Dinner - Room service",
+      "amount": 1125000,
+      "isPaid": false,
+      "paidAt": null,
+      "paymentMethod": null,
+      "createdAt": "2024-02-02T19:30:00Z"
+    }
+  ]
+}
+```
+
+### 17. Add Additional Charge (Thêm phụ phí)
+```http
+POST /api/bookings/charges
+Authorization: Bearer {token}
+```
+
+**Request:**
+```json
+{
+  "bookingId": "uuid",
+  "type": "Minibar",  // LateCheckout, Minibar, RoomService, Damages, Other
+  "description": "Minibar - Beer and snacks",
+  "amount": 450000,
+  "notes": "Guest consumed beer and snacks from minibar"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Additional charge added successfully",
+  "data": {
+    "id": "uuid",
+    "type": "Minibar",
+    "description": "Minibar - Beer and snacks",
+    "amount": 450000,
+    "isPaid": false,
+    "createdAt": "2024-02-03T10:00:00Z"
+  }
+}
+```
+
+### 18. Remove Additional Charge (Xóa phụ phí)
+```http
+DELETE /api/bookings/charges/{chargeId}
+Authorization: Bearer {token}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Charge removed successfully",
+  "data": true
+}
+```
+
+---
+
+## Enhanced Check-Out API
+
+### 19. Check-Out với Additional Charges
+```http
+POST /api/bookings/{id}/checkout
+Authorization: Bearer {token}
+```
+
+**Request:**
+```json
+{
+  "additionalCharges": [
+    {
+      "type": "Minibar",
+      "description": "Minibar consumption",
+      "amount": 625000
+    },
+    {
+      "type": "RoomService",
+      "description": "Dinner - Room service",
+      "amount": 1125000
+    },
+    {
+      "type": "LateCheckout",
+      "description": "Late checkout 3 hours",
+      "amount": 250000
+    }
+  ],
+  "paymentMethod": "Cash",
+  "notes": "Guest satisfied, no damages"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Check-out successful",
+  "data": {
+    "bookingId": "uuid",
+    "status": "CheckedOut",
+    "checkedOutAt": "2024-02-03T11:30:00Z",
+    "roomCharges": 6850000,
+    "additionalCharges": 2000000,
+    "totalAmount": 8850000,
+    "amountPaid": 6850000,
+    "balanceDue": 2000000,
+    "charges": [
+      {
+        "id": "uuid",
+        "type": "Minibar",
+        "description": "Minibar consumption",
+        "amount": 625000,
+        "isPaid": true,
+        "paidAt": "2024-02-03T11:30:00Z",
+        "paymentMethod": "Cash"
+      },
+      {
+        "id": "uuid",
+        "type": "RoomService",
+        "description": "Dinner - Room service",
+        "amount": 1125000,
+        "isPaid": true,
+        "paidAt": "2024-02-03T11:30:00Z",
+        "paymentMethod": "Cash"
+      },
+      {
+        "id": "uuid",
+        "type": "LateCheckout",
+        "description": "Late checkout 3 hours",
+        "amount": 250000,
+        "isPaid": true,
+        "paidAt": "2024-02-03T11:30:00Z",
+        "paymentMethod": "Cash"
+      }
+    ]
+  }
+}
+```
 
 ```typescript
 interface BookingManagementDto {
@@ -407,7 +731,140 @@ interface CreateWalkInBookingRequest {
   isPaid: boolean;
   source: BookingSource;
 }
-```
+
+// ============ CHANGE ROOM TYPES ============
+
+interface ChangeRoomRequestDto {
+  oldRoomId: string;
+  newRoomId: string;
+  reason?: string;
+}
+
+interface ChangeRoomResponseDto {
+  bookingId: string;
+  oldRoom: { id: string; roomNumber: string; type: string };
+  newRoom: { id: string; roomNumber: string; type: string };
+  priceDifference: number;
+  newTotalAmount: number;
+}
+
+// ============ LATE CHECKOUT TYPES ============
+
+interface LateCheckoutRequestDto {
+  newCheckOutTime: string;  // ISO 8601 datetime
+  reason?: string;
+}
+
+interface LateCheckoutResponseDto {
+  lateFeeAmount: number;
+  extraHours: number;
+  hourlyRate: number;
+  originalCheckOut: string;
+  newCheckOut: string;
+  originalTotal: number;
+  newTotal: number;
+}
+
+// ============ ADDITIONAL CHARGES TYPES ============
+
+enum AdditionalChargeType {
+  LateCheckout = 'LateCheckout',
+  Minibar = 'Minibar',
+  RoomService = 'RoomService',
+  Damages = 'Damages',
+  Other = 'Other'
+}
+
+interface AdditionalChargeDto {
+  id: string;
+  type: AdditionalChargeType;
+  description: string;
+  amount: number;
+  isPaid: boolean;
+  paidAt?: string;
+  paymentMethod?: string;
+  createdAt: string;
+}
+
+interface CreateAdditionalChargeDto {
+  bookingId: string;
+  type: AdditionalChargeType;
+  description: string;
+  amount: number;
+  notes?: string;
+}
+
+interface CheckOutResponseDto {
+  bookingId: string;
+  status: BookingStatus;
+  checkedOutAt: string;
+  roomCharges: number;
+  additionalCharges: number;
+  totalAmount: number;
+  amountPaid: number;
+  balanceDue: number;
+  charges: AdditionalChargeDto[];
+}
+
+// ============ ROOM STATUS TYPES ============
+
+enum RoomMaintenanceIssue {
+  Plumbing = 'Plumbing',
+  Electrical = 'Electrical',
+  Cleaning = 'Cleaning',
+  Damages = 'Damages',
+  Other = 'Other'
+}
+
+enum RoomMaintenancePriority {
+  Low = 'Low',
+  Medium = 'Medium',
+  High = 'High',
+  Urgent = 'Urgent'
+}
+
+interface RoomMaintenanceReportDto {
+  roomId: string;
+  issue: RoomMaintenanceIssue;
+  description: string;
+  priority: RoomMaintenancePriority;
+  reportedBy?: string;
+}
+
+interface RoomStatusSummaryDto {
+  totalRooms: number;
+  available: number;
+  occupied: number;
+  maintenance: number;
+  cleaning: number;
+  outOfOrder: number;
+}
+
+// ============ PERMISSION TYPES ============
+
+interface UserPermissions {
+  permissions: string[];
+  scope: 'system' | 'brand' | 'hotel';
+  brandId?: string;
+  hotelId?: string;
+}
+
+interface PermissionCheckResult {
+  hasPermission: boolean;
+  permission: string;
+  scope: string;
+}
+
+const PERMISSION_POLICIES = {
+  BOOKINGS_READ: 'Permission:bookings.read',
+  BOOKINGS_CREATE: 'Permission:bookings.create',
+  BOOKINGS_UPDATE: 'Permission:bookings.update',
+  BOOKINGS_DELETE: 'Permission:bookings.delete',
+  BOOKINGS_CHECKIN: 'Permission:bookings.checkin',
+  BOOKINGS_CHECKOUT: 'Permission:bookings.checkout',
+  DASHBOARD_VIEW: 'Permission:dashboard.view',
+  USERS_READ: 'Permission:users.read',
+} as const;
 
 ---
 
@@ -428,19 +885,19 @@ interface CreateWalkInBookingRequest {
 ????????????????????????????????????????????????????
 ?  ?????????????????????????????????????????????? ?
 ?  ? BK-20240201-ABC123        ? Confirmed     ? ?
-?  ? John Doe � +84901234567                   ? ?
-?  ? Feb 1 - Feb 3 � Room 301 (Deluxe King)    ? ?
-?  ? 2 guests � 6,850,000 VND ?? Paid          ? ?
+?  ? John Doe � +84901234567                   ? ?
+?  ? Feb 1 - Feb 3 � Room 301 (Deluxe King)    ? ?
+?  ? 2 guests � 6,850,000 VND ?? Paid          ? ?
 ?  ? ?????????????????????????????????????     ? ?
-?  ? [View] [Check-In] [���]                   ? ?
+?  ? [View] [Check-In] [���]                   ? ?
 ?  ?????????????????????????????????????????????? ?
 ?  ?????????????????????????????????????????????? ?
 ?  ? BK-20240201-XYZ789        ? CheckedIn     ? ?
-?  ? Jane Smith � +84901234567                 ? ?
-?  ? Jan 30 - Feb 2 � Room 205 (Suite)         ? ?
-?  ? 2 guests � 11,250,000 VND ?? Paid         ? ?
+?  ? Jane Smith � +84901234567                 ? ?
+?  ? Jan 30 - Feb 2 � Room 205 (Suite)         ? ?
+?  ? 2 guests � 11,250,000 VND ?? Paid         ? ?
 ?  ? ?????????????????????????????????????     ? ?
-?  ? [View] [Check-Out] [���]                  ? ?
+?  ? [View] [Check-Out] [���]                  ? ?
 ?  ?????????????????????????????????????????????? ?
 ????????????????????????????????????????????????????
 
@@ -484,9 +941,9 @@ interface CreateWalkInBookingRequest {
 ?  Balance:                      0 VND             ?
 ?                                                  ?
 ?  ??? Timeline ?????????????????????????????????  ?
-?  � Jan 20, 10:00 - Booking created (Website)     ?
-?  � Jan 20, 10:05 - Payment received (6.85M)      ?
-?  � Jan 20, 10:05 - Confirmation email sent       ?
+?  � Jan 20, 10:00 - Booking created (Website)     ?
+?  � Jan 20, 10:05 - Payment received (6.85M)      ?
+?  � Jan 20, 10:05 - Confirmation email sent       ?
 ?                                                  ?
 ?  ??? Notes ?????????????????????? [+ Add Note]   ?
 ?  ?? Guest called to confirm late arrival         ?
@@ -536,7 +993,7 @@ interface CreateWalkInBookingRequest {
 ?          Check-Out Guest             ?
 ????????????????????????????????????????
 ?  Guest: John Doe                     ?
-?  Room: 301 � Feb 1-3, 2024           ?
+?  Room: 301 � Feb 1-3, 2024           ?
 ?                                      ?
 ?  ??? Charges Summary ???????????????  ?
 ?  Room charges:        6,850,000 VND  ?

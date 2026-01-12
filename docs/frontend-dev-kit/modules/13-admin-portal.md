@@ -1,14 +1,63 @@
 # Module 13: Super Admin Portal
 
+## Authorization & Permissions
+
+> **Hệ thống phân quyền động**: Sử dụng `[Authorize(Policy = "Permission:xxx")]` thay vì role-based cứng
+
+### SuperAdmin Permission Scope
+
+SuperAdmin có quyền **system-wide** nhưng **KHÔNG được phép CRUD hotels trực tiếp**. Chỉ BrandAdmin mới có quyền quản lý hotels.
+
+### Permission Policies cho Admin
+
+| Policy | Mô tả | Cho phép |
+|--------|-------|----------|
+| `Permission:brands.read` | Xem brands | SuperAdmin, BrandAdmin (own) |
+| `Permission:brands.create` | Tạo brand mới | SuperAdmin |
+| `Permission:brands.update` | Cập nhật brand | SuperAdmin |
+| `Permission:brands.delete` | Xóa brand | SuperAdmin |
+| `Permission:users.read` | Xem users | SuperAdmin, BrandAdmin, HotelManager |
+| `Permission:users.create` | Tạo user | SuperAdmin, BrandAdmin, HotelManager |
+| `Permission:users.update` | Cập nhật user | SuperAdmin, BrandAdmin (brand), HotelManager (hotel) |
+| `Permission:users.delete` | Xóa user | SuperAdmin, BrandAdmin, HotelManager |
+| `Permission:dashboard.viewall` | Xem dashboard toàn hệ thống | SuperAdmin |
+| `Permission:dashboard.view` | Xem dashboard | Tất cả authenticated users |
+| `Permission:subscriptions.read` | Xem subscriptions | SuperAdmin, BrandAdmin |
+| `Permission:subscriptions.update` | Cập nhật subscriptions | SuperAdmin |
+
+### Role-Based Access Matrix cho Admin Portal
+
+| Action | SuperAdmin | BrandAdmin | HotelManager | Receptionist | Staff |
+|--------|------------|------------|--------------|--------------|-------|
+| Xem tất cả brands | ✅ | Own only | ❌ | ❌ | ❌ |
+| Tạo brand | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Xóa brand | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Xem tất cả users | ✅ | Brand users | Hotel users | ❌ | ❌ |
+| Tạo user (BrandAdmin) | ✅ | ✅ (trong brand) | ❌ | ❌ | ❌ |
+| Tạo user (HotelManager) | ✅ | ❌ | ✅ (trong hotel) | ❌ | ❌ |
+| Xóa user | ✅ | Brand users | Hotel users | ❌ | ❌ |
+| Xem system dashboard | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Xem brand dashboard | ✅ | ✅ (own) | ❌ | ❌ | ❌ |
+| Duyệt onboarding | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Quản lý subscriptions | ✅ | Read only | ❌ | ❌ | ❌ |
+
+### Lưu ý quan trọng
+
+- **SuperAdmin KHÔNG thể**: Create/Update/Delete hotels trực tiếp
+- **SuperAdmin CHỉ có thể**: Xem hotels (read-only) để monitor
+- **Hotel CRUD**: Chỉ BrandAdmin mới có quyền này cho hotels trong brand của mình
+
+---
+
 ## Screens
 
-| Screen | Route | M� t? |
+| Screen | Route | M� t? |
 |--------|-------|-------|
 | Admin Dashboard | `/admin/dashboard` | T?ng quan h? th?ng |
 | Onboarding Review | `/admin/onboarding` | Duy?t partner m?i |
-| User Management | `/admin/users` | Qu?n l� users |
-| Brand Management | `/admin/brands` | Qu?n l� brands |
-| System Settings | `/admin/settings` | C�i ??t h? th?ng |
+| User Management | `/admin/users` | Qu?n l� users |
+| Brand Management | `/admin/brands` | Qu?n l� brands |
+| System Settings | `/admin/settings` | C�i ??t h? th?ng |
 
 ---
 
@@ -21,14 +70,12 @@
 ## API Endpoints
 
 ### 1. Admin Dashboard Stats (Brand Dashboard)
-
-> ?? **Note**: Hi?n t?i BE ch?a c� endpoint `/api/dashboard/admin` ri�ng. S? d?ng Brand Dashboard ?? aggregate data.
-
 ```http
 GET /api/dashboard/brand/{brandId}
 Authorization: Bearer {token}
 Roles: SuperAdmin, BrandAdmin
 ```
+**Required Policy:** `Permission:dashboard.viewall` (SuperAdmin) hoặc `Permission:dashboard.view` (BrandAdmin)
 
 **Response:**
 ```json
@@ -84,8 +131,8 @@ Roles: SuperAdmin, BrandAdmin
 ```http
 GET /api/onboarding/admin/all
 Authorization: Bearer {token}
-Roles: SuperAdmin
 ```
+**Required Policy:** `Permission:users.create` (SuperAdmin)
 
 **Response:**
 ```json
@@ -117,8 +164,8 @@ Roles: SuperAdmin
 ```http
 GET /api/onboarding/admin/pending
 Authorization: Bearer {token}
-Roles: SuperAdmin
 ```
+**Required Policy:** `Permission:users.create` (SuperAdmin)
 
 ---
 
@@ -126,8 +173,8 @@ Roles: SuperAdmin
 ```http
 GET /api/onboarding/admin/search
 Authorization: Bearer {token}
-Roles: SuperAdmin
 ```
+**Required Policy:** `Permission:users.create` (SuperAdmin)
 
 **Query Parameters:**
 | Param | Type | Default | Description |
@@ -159,8 +206,8 @@ enum OnboardingStatus {
 ```http
 GET /api/onboarding/admin/stats
 Authorization: Bearer {token}
-Roles: SuperAdmin
 ```
+**Required Policy:** `Permission:dashboard.viewall` (SuperAdmin)
 
 **Response:**
 ```json
@@ -187,8 +234,8 @@ Roles: SuperAdmin
 ```http
 POST /api/onboarding/admin/{id}/review
 Authorization: Bearer {token}
-Roles: SuperAdmin
 ```
+**Required Policy:** `Permission:users.create` (SuperAdmin)
 
 **Request:**
 ```json
@@ -210,8 +257,8 @@ Roles: SuperAdmin
 ```http
 POST /api/onboarding/admin/{id}/approve
 Authorization: Bearer {token}
-Roles: SuperAdmin
 ```
+**Required Policy:** `Permission:users.create` (SuperAdmin) - Tạo Brand + Hotel + Subscription
 
 **Response:**
 ```json
@@ -255,8 +302,8 @@ Roles: SuperAdmin
 ```http
 GET /api/users
 Authorization: Bearer {token}
-Roles: SuperAdmin
 ```
+**Required Policy:** `Permission:users.read` (scope-based)
 
 **Response:**
 ```json
@@ -288,8 +335,8 @@ Roles: SuperAdmin
 ```http
 GET /api/users/role/{role}
 Authorization: Bearer {token}
-Roles: SuperAdmin
 ```
+**Required Policy:** `Permission:users.read` (scope-based)
 
 **Role Options:**
 ```typescript
@@ -308,8 +355,8 @@ enum UserRole {
 ```http
 PUT /api/users/{id}
 Authorization: Bearer {token}
-Roles: SuperAdmin
 ```
+**Required Policy:** `Permission:users.update` (scope-based)
 
 **Request:**
 ```json
@@ -340,8 +387,8 @@ enum UserStatus {
 ```http
 DELETE /api/users/{id}
 Authorization: Bearer {token}
-Roles: SuperAdmin
 ```
+**Required Policy:** `Permission:users.delete` (scope-based)
 
 ---
 
@@ -350,6 +397,7 @@ Roles: SuperAdmin
 GET /api/brands
 Authorization: Bearer {token}
 ```
+**Required Policy:** `Permission:brands.read`
 
 **Response:**
 ```json
@@ -389,8 +437,8 @@ Authorization: Bearer {token}
 ```http
 POST /api/brands
 Authorization: Bearer {token}
-Roles: SuperAdmin
 ```
+**Required Policy:** `Permission:brands.create` (SuperAdmin only)
 
 **Request:**
 ```json
@@ -413,8 +461,8 @@ Roles: SuperAdmin
 ```http
 PUT /api/brands/{id}
 Authorization: Bearer {token}
-Roles: SuperAdmin
 ```
+**Required Policy:** `Permission:brands.update` (SuperAdmin only)
 
 ---
 
@@ -422,8 +470,8 @@ Roles: SuperAdmin
 ```http
 DELETE /api/brands/{id}
 Authorization: Bearer {token}
-Roles: SuperAdmin
 ```
+**Required Policy:** `Permission:brands.delete` (SuperAdmin only)
 
 ---
 
@@ -477,7 +525,7 @@ Roles: SuperAdmin
 ?  ?         contact@sunsethotels.com           ? ?
 ?  ? ?????????????????????????????????????      ? ?
 ?  ? Location: Da Nang, Vietnam                 ? ?
-?  ? Rooms: 120 � ?????                      ? ?
+?  ? Rooms: 120 � ?????                      ? ?
 ?  ? Submitted: Jan 15, 2024                    ? ?
 ?  ? ?????????????????????????????????????      ? ?
 ?  ? Documents: 3 uploaded                      ? ?
@@ -554,21 +602,21 @@ Roles: SuperAdmin
 ?  ?????????????????????????????????????????????? ?
 ?  ? ?? John Doe                    ? Active    ? ?
 ?  ?    john@example.com                        ? ?
-?  ?    Role: BrandAdmin � Sunset Hotels        ? ?
+?  ?    Role: BrandAdmin � Sunset Hotels        ? ?
 ?  ?    Last login: 2 hours ago                 ? ?
 ?  ?                         [Edit] [Suspend]   ? ?
 ?  ?????????????????????????????????????????????? ?
 ?  ?????????????????????????????????????????????? ?
 ?  ? ?? Jane Smith                  ? Active    ? ?
 ?  ?    jane@example.com                        ? ?
-?  ?    Role: HotelManager � Marriott Saigon    ? ?
+?  ?    Role: HotelManager � Marriott Saigon    ? ?
 ?  ?    Last login: 1 day ago                   ? ?
 ?  ?                         [Edit] [Suspend]   ? ?
 ?  ?????????????????????????????????????????????? ?
 ?  ?????????????????????????????????????????????? ?
 ?  ? ?? Bob Wilson                  ? Suspended ? ?
 ?  ?    bob@example.com                         ? ?
-?  ?    Role: Receptionist � Hilton Danang      ? ?
+?  ?    Role: Receptionist � Hilton Danang      ? ?
 ?  ?    Reason: Terms violation                 ? ?
 ?  ?                        [Edit] [Reactivate] ? ?
 ?  ?????????????????????????????????????????????? ?
@@ -588,7 +636,7 @@ Roles: SuperAdmin
 ????????????????????????????????????????????????????
 ?  ?????????????????????????????????????????????? ?
 ?  ? ?? Marriott Hotels & Resorts   ? Active    ? ?
-?  ?    3 Hotels � 450 Rooms                    ? ?
+?  ?    3 Hotels � 450 Rooms                    ? ?
 ?  ?    Commission: 15%                         ? ?
 ?  ?    Subscription: Premium (Active)          ? ?
 ?  ?    Created: Jun 15, 2023                   ? ?
@@ -596,7 +644,7 @@ Roles: SuperAdmin
 ?  ?????????????????????????????????????????????? ?
 ?  ?????????????????????????????????????????????? ?
 ?  ? ?? Hilton Worldwide            ? Active    ? ?
-?  ?    2 Hotels � 300 Rooms                    ? ?
+?  ?    2 Hotels � 300 Rooms                    ? ?
 ?  ?    Commission: 15%                         ? ?
 ?  ?    Subscription: Standard (Active)         ? ?
 ?  ?    Created: Jul 20, 2023                   ? ?
@@ -816,3 +864,79 @@ interface ReviewStatsDto {
   twoStarCount: number;
   oneStarCount: number;
 }
+
+// ============ PERMISSION TYPES ============
+
+interface UserPermissions {
+  permissions: string[];
+  scope: 'system' | 'brand' | 'hotel';
+  brandId?: string;
+  hotelId?: string;
+}
+
+interface PermissionCheckResult {
+  hasPermission: boolean;
+  permission: string;
+  scope: string;
+}
+
+interface RolePermission {
+  role: UserRole;
+  permissions: string[];
+}
+
+const PERMISSION_POLICIES = {
+  // Brand permissions
+  BRANDS_READ: 'Permission:brands.read',
+  BRANDS_CREATE: 'Permission:brands.create',
+  BRANDS_UPDATE: 'Permission:brands.update',
+  BRANDS_DELETE: 'Permission:brands.delete',
+
+  // User permissions
+  USERS_READ: 'Permission:users.read',
+  USERS_CREATE: 'Permission:users.create',
+  USERS_UPDATE: 'Permission:users.update',
+  USERS_DELETE: 'Permission:users.delete',
+
+  // Dashboard permissions
+  DASHBOARD_VIEW: 'Permission:dashboard.view',
+  DASHBOARD_VIEW_ALL: 'Permission:dashboard.viewall',
+
+  // Subscription permissions
+  SUBSCRIPTIONS_READ: 'Permission:subscriptions.read',
+  SUBSCRIPTIONS_UPDATE: 'Permission:subscriptions.update',
+} as const;
+
+// Default permissions by role
+const ROLE_DEFAULT_PERMISSIONS: Record<UserRole, string[]> = {
+  [UserRole.SuperAdmin]: [
+    PERMISSION_POLICIES.BRANDS_READ,
+    PERMISSION_POLICIES.BRANDS_CREATE,
+    PERMISSION_POLICIES.BRANDS_UPDATE,
+    PERMISSION_POLICIES.BRANDS_DELETE,
+    PERMISSION_POLICIES.USERS_READ,
+    PERMISSION_POLICIES.USERS_CREATE,
+    PERMISSION_POLICIES.USERS_UPDATE,
+    PERMISSION_POLICIES.USERS_DELETE,
+    PERMISSION_POLICIES.DASHBOARD_VIEW_ALL,
+    PERMISSION_POLICIES.SUBSCRIPTIONS_READ,
+    PERMISSION_POLICIES.SUBSCRIPTIONS_UPDATE,
+  ],
+  [UserRole.BrandAdmin]: [
+    PERMISSION_POLICIES.BRANDS_READ,
+    PERMISSION_POLICIES.USERS_READ,
+    PERMISSION_POLICIES.USERS_CREATE,
+    PERMISSION_POLICIES.USERS_UPDATE,
+    PERMISSION_POLICIES.USERS_DELETE,
+    PERMISSION_POLICIES.DASHBOARD_VIEW,
+    PERMISSION_POLICIES.SUBSCRIPTIONS_READ,
+  ],
+  [UserRole.HotelManager]: [
+    PERMISSION_POLICIES.USERS_READ,
+    PERMISSION_POLICIES.USERS_CREATE,
+    PERMISSION_POLICIES.USERS_UPDATE,
+    PERMISSION_POLICIES.DASHBOARD_VIEW,
+  ],
+  [UserRole.Receptionist]: [],
+  [UserRole.Guest]: [],
+} as const;

@@ -47,5 +47,6 @@ namespace Hotel_SAAS_Backend.API.Models.Entities
         public virtual Promotion? AppliedPromotion { get; set; }
         public virtual ICollection<BookingRoom> BookingRooms { get; set; } = new List<BookingRoom>();
         public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+        public virtual ICollection<AdditionalCharge> AdditionalCharges { get; set; } = new List<AdditionalCharge>();
     }
 }

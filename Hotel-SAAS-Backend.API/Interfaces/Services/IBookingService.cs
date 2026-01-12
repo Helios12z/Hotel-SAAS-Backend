@@ -15,7 +15,19 @@ namespace Hotel_SAAS_Backend.API.Interfaces.Services
         Task<bool> CancelBookingAsync(Guid id, string? reason);
         Task<bool> ConfirmBookingAsync(Guid id);
         Task<bool> CheckInAsync(Guid id);
-        Task<bool> CheckOutAsync(Guid id);
+        Task<CheckOutResponseDto> CheckOutAsync(Guid id, CheckOutRequestDto? request = null);
         Task<BookingCalculationDto> CalculatePriceAsync(CalculatePriceDto calculatePriceDto);
+
+        // ============ Change Room ============
+        Task<BookingDto> ChangeRoomAsync(Guid bookingId, ChangeRoomRequestDto request);
+
+        // ============ Late Checkout ============
+        Task<LateCheckoutResponseDto> CalculateLateCheckoutFeeAsync(Guid bookingId, LateCheckoutRequestDto request);
+        Task<LateCheckoutResponseDto> ProcessLateCheckoutAsync(Guid bookingId, LateCheckoutRequestDto request);
+
+        // ============ Additional Charges ============
+        Task<AdditionalChargeDto> AddAdditionalChargeAsync(CreateAdditionalChargeDto request);
+        Task<IEnumerable<AdditionalChargeDto>> GetAdditionalChargesAsync(Guid bookingId);
+        Task<bool> RemoveAdditionalChargeAsync(Guid chargeId);
     }
 }

@@ -137,6 +137,70 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 Data = result
             });
         }
+
+        // ============ Room Status & Maintenance ============
+
+        [Authorize(Roles = "SuperAdmin,BrandAdmin,HotelManager,Receptionist")]
+        [HttpGet("status/{status}")]
+        public async Task<ActionResult<ApiResponseDto<IEnumerable<RoomDto>>>> GetRoomsByStatus(Guid hotelId, RoomStatus status)
+        {
+            var rooms = await _roomService.GetRoomsByStatusAsync(hotelId, status);
+            return Ok(new ApiResponseDto<IEnumerable<RoomDto>>
+            {
+                Success = true,
+                Data = rooms
+            });
+        }
+
+        [Authorize(Roles = "SuperAdmin,BrandAdmin,HotelManager,Receptionist")]
+        [HttpGet("maintenance")]
+        public async Task<ActionResult<ApiResponseDto<IEnumerable<RoomDto>>>> GetMaintenanceRooms(Guid hotelId)
+        {
+            var rooms = await _roomService.GetMaintenanceRoomsAsync(hotelId);
+            return Ok(new ApiResponseDto<IEnumerable<RoomDto>>
+            {
+                Success = true,
+                Data = rooms
+            });
+        }
+
+        [Authorize(Roles = "SuperAdmin,BrandAdmin,HotelManager,Receptionist")]
+        [HttpPost("{id}/maintenance")]
+        public async Task<ActionResult<ApiResponseDto<bool>>> ReportMaintenance(Guid hotelId, Guid id, [FromBody] RoomMaintenanceReportDto report)
+        {
+            report.RoomId = id;
+            var result = await _roomService.ReportRoomMaintenanceAsync(id, report);
+            return Ok(new ApiResponseDto<bool>
+            {
+                Success = result,
+                Message = result ? "Maintenance reported successfully" : "Failed to report maintenance",
+                Data = result
+            });
+        }
+
+        [Authorize(Roles = "SuperAdmin,BrandAdmin,HotelManager,Receptionist")]
+        [HttpPatch("{id}/available")]
+        public async Task<ActionResult<ApiResponseDto<RoomDto>>> MarkAvailable(Guid hotelId, Guid id)
+        {
+            try
+            {
+                var room = await _roomService.MarkRoomAvailableAsync(id);
+                return Ok(new ApiResponseDto<RoomDto>
+                {
+                    Success = true,
+                    Message = "Room marked as available",
+                    Data = room
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponseDto<RoomDto>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
     }
 
     public class RoomStatusDto

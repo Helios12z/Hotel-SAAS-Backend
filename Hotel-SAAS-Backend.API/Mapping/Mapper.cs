@@ -180,12 +180,51 @@ namespace Hotel_SAAS_Backend.API.Mapping
                 PhoneNumber = entity.PhoneNumber,
                 Email = entity.Email,
                 Website = entity.Website,
-                CheckInTime = entity.CheckInTime,
-                CheckOutTime = entity.CheckOutTime,
-                CancellationPolicy = entity.CancellationPolicy,
-                ChildPolicy = entity.ChildPolicy,
-                PetPolicy = entity.PetPolicy,
                 TotalRooms = entity.TotalRooms,
+                NumberOfFloors = entity.NumberOfFloors,
+                TaxId = entity.TaxId,
+                SmokingPolicy = entity.SmokingPolicy,
+
+                // Settings - All config
+                Settings = new HotelSettingsDto
+                {
+                    CheckInTime = entity.CheckInTime,
+                    CheckOutTime = entity.CheckOutTime,
+                    MaxAdultsPerRoom = entity.MaxAdultsPerRoom,
+                    MaxChildrenPerRoom = entity.MaxChildrenPerRoom,
+                    MaxGuestsPerRoom = entity.MaxGuestsPerRoom,
+                    AllowExtraBed = entity.AllowExtraBed,
+                    ExtraBedPrice = entity.ExtraBedPrice,
+                    MinNights = entity.MinNights,
+                    MaxNights = entity.MaxNights,
+                    MinAdvanceBookingHours = entity.MinAdvanceBookingHours,
+                    MaxAdvanceBookingDays = entity.MaxAdvanceBookingDays,
+                    EnableStripePayment = entity.EnableStripePayment,
+                    EnablePayAtHotel = entity.EnablePayAtHotel,
+                    StripeAccountId = entity.StripeAccountId,
+                    TaxRate = entity.TaxRate,
+                    ServiceFeeRate = entity.ServiceFeeRate,
+                    CancellationPolicy = entity.CancellationPolicy,
+                    ChildPolicy = entity.ChildPolicy,
+                    PetPolicy = entity.PetPolicy
+                },
+
+                // Public Settings - Show to guests
+                PublicSettings = new HotelPublicSettingsDto
+                {
+                    CheckInTime = entity.CheckInTime,
+                    CheckOutTime = entity.CheckOutTime,
+                    MaxGuestsPerRoom = entity.MaxGuestsPerRoom,
+                    AllowExtraBed = entity.AllowExtraBed,
+                    ExtraBedPrice = entity.ExtraBedPrice,
+                    CancellationPolicy = entity.CancellationPolicy,
+                    ChildPolicy = entity.ChildPolicy,
+                    PetPolicy = entity.PetPolicy,
+                    SmokingPolicy = entity.SmokingPolicy,
+                    EnableStripePayment = entity.EnableStripePayment,
+                    EnablePayAtHotel = entity.EnablePayAtHotel
+                },
+
                 Images = entity.Images?.Select(i => new HotelImageDto
                 {
                     ImageUrl = i.ImageUrl,

@@ -1,15 +1,47 @@
 # Module 07: Hotel Management (Partner Portal)
 
+## Authorization & Permissions
+
+> **Hệ thống phân quyền động**: Sử dụng `[Authorize(Policy = "Permission:xxx")]` thay vì role-based cứng
+
+### Permission Policies
+
+| Policy | Mô tả | Cho phép |
+|--------|-------|----------|
+| `Permission:hotels.read` | Xem danh sách hotels | Tất cả authenticated users |
+| `Permission:hotels.create` | Tạo hotel mới | BrandAdmin (của brand đó) |
+| `Permission:hotels.update` | Cập nhật thông tin hotel | BrandAdmin (brand), HotelManager (hotel được assign) |
+| `Permission:hotels.delete` | Xóa hotel | BrandAdmin (của brand đó) |
+
+### Role-Based Access Matrix
+
+| Action | SuperAdmin | BrandAdmin | HotelManager | Receptionist | Staff |
+|--------|------------|------------|--------------|--------------|-------|
+| Xem hotels | Read (all) | Read (own) | Read (own) | Read (own) | Read (own) |
+| Tạo hotel | ❌ | ✅ | ❌ | ❌ | ❌ |
+| Sửa hotel | ❌ | ✅ (own) | ✅ (own) | ❌ | ❌ |
+| Xóa hotel | ❌ | ✅ (own) | ❌ | ❌ | ❌ |
+
+### Context-Based Checks
+
+Backend sử dụng `PermissionContext` để kiểm tra:
+- **SuperAdmin**: Chỉ có quyền read (không CRUD hotels trực tiếp)
+- **BrandAdmin**: Chỉ truy cập hotels trong brand của mình
+- **HotelManager**: Chỉ truy cập hotel được assign
+- **Receptionist/Staff**: Quyền hạn chế, có thể bị override bởi user-specific permissions
+
+---
+
 ## Screens
 
-| Screen | Route | M� t? |
+| Screen | Route | M� t? |
 |--------|-------|-------|
-| Hotels List | `/manage/hotels` | Danh s�ch hotels c?a partner |
+| Hotels List | `/manage/hotels` | Danh s�ch hotels c?a partner |
 | Hotel Detail | `/manage/hotels/[id]` | Chi ti?t & ch?nh s?a hotel |
-| Add Hotel | `/manage/hotels/new` | Th�m hotel m?i |
-| Hotel Settings | `/manage/hotels/[id]/settings` | C�i ??t hotel |
-| Hotel Images | `/manage/hotels/[id]/images` | Qu?n l� ?nh |
-| Hotel Amenities | `/manage/hotels/[id]/amenities` | Qu?n l� ti?n �ch |
+| Add Hotel | `/manage/hotels/new` | Th�m hotel m?i |
+| Hotel Settings | `/manage/hotels/[id]/settings` | C�i ??t hotel |
+| Hotel Images | `/manage/hotels/[id]/images` | Qu?n l� ?nh |
+| Hotel Amenities | `/manage/hotels/[id]/amenities` | Qu?n l� ti?n �ch |
 
 ---
 
@@ -20,6 +52,7 @@
 GET /api/hotels/my-hotels
 Authorization: Bearer {token}
 ```
+**Required Policy:** `Permission:hotels.read`
 
 **Response:**
 ```json
@@ -65,6 +98,7 @@ Authorization: Bearer {token}
 POST /api/hotels
 Authorization: Bearer {token}
 ```
+**Required Policy:** `Permission:hotels.create` + BrandAdmin role
 
 **Request:**
 ```json
@@ -101,6 +135,7 @@ Authorization: Bearer {token}
 PUT /api/hotels/{id}
 Authorization: Bearer {token}
 ```
+**Required Policy:** `Permission:hotels.update` + scope check (BrandAdmin own brand / HotelManager own hotel)
 
 **Request:** Same as create (partial update supported)
 
@@ -224,6 +259,124 @@ GET /api/amenities
 POST /api/hotels/{id}/toggle-status
 Authorization: Bearer {token}
 ```
+**Required Policy:** `Permission:hotels.update` + BrandAdmin (own brand)
+
+---
+
+## Hotel Settings API
+
+### 12. Get Hotel Settings
+```http
+GET /api/hotels/{id}/settings
+Authorization: Bearer {token}
+```
+**Response:** Full hotel settings (for BrandAdmin/HotelManager)
+```json
+{
+  "success": true,
+  "data": {
+    "timeConfig": {
+      "checkInTime": "14:00",
+      "checkOutTime": "12:00"
+    },
+    "guestConfig": {
+      "maxAdultsPerRoom": 2,
+      "maxChildrenPerRoom": 1,
+      "maxGuestsPerRoom": 4,
+      "allowExtraBed": true,
+      "extraBedPrice": 500000
+    },
+    "bookingRules": {
+      "minNights": 1,
+      "maxNights": 30,
+      "minAdvanceBookingHours": 24,
+      "maxAdvanceBookingDays": 365
+    },
+    "paymentConfig": {
+      "enableStripePayment": true,
+      "enablePayAtHotel": true,
+      "stripeAccountId": "acct_xxx"
+    },
+    "taxFeeConfig": {
+      "taxRate": 0.10,
+      "serviceFeeRate": 0.05
+    },
+    "policies": {
+      "cancellationPolicy": "Free cancellation 48h before check-in",
+      "childPolicy": "Children under 12 stay free",
+      "petPolicy": "Pets allowed with fee",
+      "smokingPolicy": "No smoking in rooms"
+    }
+  }
+}
+```
+
+### 13. Update Hotel Settings
+```http
+PUT /api/hotels/{id}/settings
+Authorization: Bearer {token}
+```
+**Required Policy:** `Permission:hotels.update`
+
+**Request:**
+```json
+{
+  "timeConfig": {
+    "checkInTime": "15:00",
+    "checkOutTime": "11:00"
+  },
+  "guestConfig": {
+    "maxAdultsPerRoom": 3,
+    "maxChildrenPerRoom": 2,
+    "maxGuestsPerRoom": 5,
+    "allowExtraBed": true,
+    "extraBedPrice": 750000
+  },
+  "bookingRules": {
+    "minNights": 2,
+    "maxNights": 14,
+    "minAdvanceBookingHours": 48,
+    "maxAdvanceBookingDays": 180
+  },
+  "paymentConfig": {
+    "enableStripePayment": true,
+    "enablePayAtHotel": false,
+    "stripeAccountId": "acct_xxx"
+  },
+  "policies": {
+    "cancellationPolicy": "Free cancellation 72h before check-in",
+    "childPolicy": "Children under 6 stay free",
+    "petPolicy": "No pets allowed",
+    "smokingPolicy": "Smoking area available"
+  }
+}
+```
+
+### 14. Get Public Hotel Settings (for Guest)
+```http
+GET /api/hotels/{id}/public-settings
+```
+**Response:** Public-facing settings (no sensitive data)
+```json
+{
+  "success": true,
+  "data": {
+    "checkInTime": "14:00",
+    "checkOutTime": "12:00",
+    "maxGuestsPerRoom": 4,
+    "allowExtraBed": true,
+    "extraBedPrice": 500000,
+    "cancellationPolicy": "Free cancellation 48h before check-in",
+    "childPolicy": "Children under 12 stay free",
+    "petPolicy": "Pets allowed with fee",
+    "smokingPolicy": "No smoking in rooms",
+    "paymentMethods": {
+      "stripePayment": true,
+      "payAtHotel": true
+    }
+  }
+}
+```
 
 ---
 
@@ -239,7 +392,7 @@ Authorization: Bearer {token}
 ?  ?    ? Da Nang, Vietnam     ?  Active      ? ?
 ?  ?    ? ? 4.5 (234 reviews)                 ? ?
 ?  ?    ? ?????????????????????????????????   ? ?
-?  ?    ? Today: 15 check-ins � 12 check-outs ? ?
+?  ?    ? Today: 15 check-ins � 12 check-outs ? ?
 ?  ?    ? Occupancy: 85%                      ? ?
 ?  ?    ?                        [Manage ?]   ? ?
 ?  ?????????????????????????????????????????????? ?
@@ -248,7 +401,7 @@ Authorization: Bearer {token}
 ?  ?    ? Ho Chi Minh City     ?  Inactive    ? ?
 ?  ?    ? ? 4.2 (180 reviews)                 ? ?
 ?  ?    ? ?????????????????????????????????   ? ?
-?  ?    ? Today: 0 check-ins � 0 check-outs   ? ?
+?  ?    ? Today: 0 check-ins � 0 check-outs   ? ?
 ?  ?    ? Occupancy: 0%                       ? ?
 ?  ?    ?                        [Manage ?]   ? ?
 ?  ?????????????????????????????????????????????? ?
@@ -295,7 +448,7 @@ Authorization: Bearer {token}
 ????????????????????????????????????????????????????
 ?  ? Back          Hotel Images          [+ Upload]?
 ????????????????????????????????????????????????????
-?  Drag to reorder � Click ? to set as primary   ?
+?  Drag to reorder � Click ? to set as primary   ?
 ????????????????????????????????????????????????????
 ?  ?????????? ?????????? ?????????? ??????????   ?
 ?  ?  ?    ? ?        ? ?        ? ?        ?   ?
@@ -386,8 +539,34 @@ interface CreateHotelRequest {
   starRating: number;
   totalRooms?: number;
   numberOfFloors?: number;
+
+  // Time Config
   checkInTime?: string;
   checkOutTime?: string;
+
+  // Guest Config
+  maxAdultsPerRoom?: number;
+  maxChildrenPerRoom?: number;
+  maxGuestsPerRoom?: number;
+  allowExtraBed?: boolean;
+  extraBedPrice?: number;
+
+  // Booking Rules
+  minNights?: number;
+  maxNights?: number;
+  minAdvanceBookingHours?: number;
+  maxAdvanceBookingDays?: number;
+
+  // Payment Config
+  enableStripePayment?: boolean;
+  enablePayAtHotel?: boolean;
+  stripeAccountId?: string;
+
+  // Tax & Fee
+  taxRate?: number;
+  serviceFeeRate?: number;
+
+  // Policies
   cancellationPolicy?: string;
   childPolicy?: string;
   petPolicy?: string;
@@ -421,6 +600,71 @@ interface AmenityDto {
   description?: string;
 }
 
+// ============ HOTEL SETTINGS TYPES ============
+
+interface HotelSettingsDto {
+  timeConfig: TimeConfigDto;
+  guestConfig: GuestConfigDto;
+  bookingRules: BookingRulesDto;
+  paymentConfig: PaymentConfigDto;
+  taxFeeConfig: TaxFeeConfigDto;
+  policies: PoliciesDto;
+}
+
+interface TimeConfigDto {
+  checkInTime: string;  // "14:00"
+  checkOutTime: string; // "12:00"
+}
+
+interface GuestConfigDto {
+  maxAdultsPerRoom: number;
+  maxChildrenPerRoom: number;
+  maxGuestsPerRoom: number;
+  allowExtraBed: boolean;
+  extraBedPrice?: number;
+}
+
+interface BookingRulesDto {
+  minNights: number;
+  maxNights: number;
+  minAdvanceBookingHours: number;
+  maxAdvanceBookingDays: number;
+}
+
+interface PaymentConfigDto {
+  enableStripePayment: boolean;  // Pay online via Stripe
+  enablePayAtHotel: boolean;     // Pay at front desk
+  stripeAccountId?: string;
+}
+
+interface TaxFeeConfigDto {
+  taxRate: number;        // 0.10 = 10%
+  serviceFeeRate: number; // 0.05 = 5%
+}
+
+interface PoliciesDto {
+  cancellationPolicy?: string;
+  childPolicy?: string;
+  petPolicy?: string;
+  smokingPolicy?: string;
+}
+
+interface HotelPublicSettingsDto {
+  checkInTime: string;
+  checkOutTime: string;
+  maxGuestsPerRoom: number;
+  allowExtraBed: boolean;
+  extraBedPrice?: number;
+  cancellationPolicy?: string;
+  childPolicy?: string;
+  petPolicy?: string;
+  smokingPolicy?: string;
+  paymentMethods: {
+    stripePayment: boolean;
+    payAtHotel: boolean;
+  };
+}
+
 enum AmenityType {
   General = 0,
   Room = 1,
@@ -430,3 +674,33 @@ enum AmenityType {
   Service = 5,
   Facilities = 6
 }
+
+// ============ PERMISSION TYPES ============
+
+interface UserPermissions {
+  permissions: string[];
+  scope: 'system' | 'brand' | 'hotel';
+  brandId?: string;
+  hotelId?: string;
+}
+
+interface PermissionCheckResult {
+  hasPermission: boolean;
+  permission: string;
+  scope: string;
+}
+
+const PERMISSION_POLICIES = {
+  HOTELS_READ: 'Permission:hotels.read',
+  HOTELS_CREATE: 'Permission:hotels.create',
+  HOTELS_UPDATE: 'Permission:hotels.update',
+  HOTELS_DELETE: 'Permission:hotels.delete',
+  ROOMS_READ: 'Permission:rooms.read',
+  ROOMS_CREATE: 'Permission:rooms.create',
+  BOOKINGS_READ: 'Permission:bookings.read',
+  BOOKINGS_CHECKIN: 'Permission:bookings.checkin',
+  BOOKINGS_CHECKOUT: 'Permission:bookings.checkout',
+  DASHBOARD_VIEW: 'Permission:dashboard.view',
+  USERS_READ: 'Permission:users.read',
+  USERS_CREATE: 'Permission:users.create',
+} as const;

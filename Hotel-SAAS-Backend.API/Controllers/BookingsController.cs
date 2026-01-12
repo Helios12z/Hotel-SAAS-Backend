@@ -184,13 +184,150 @@ namespace Hotel_SAAS_Backend.API.Controllers
 
         [Authorize(Roles = "SuperAdmin,BrandAdmin,HotelManager,Receptionist")]
         [HttpPost("{id}/checkout")]
-        public async Task<ActionResult<ApiResponseDto<bool>>> CheckOut(Guid id)
+        public async Task<ActionResult<ApiResponseDto<CheckOutResponseDto>>> CheckOut(Guid id, [FromBody] CheckOutRequestDto? request)
         {
-            var result = await _bookingService.CheckOutAsync(id);
+            try
+            {
+                var result = await _bookingService.CheckOutAsync(id, request);
+                return Ok(new ApiResponseDto<CheckOutResponseDto>
+                {
+                    Success = true,
+                    Message = "Check-out successful",
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponseDto<CheckOutResponseDto>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        // ============ Change Room ============
+
+        [Authorize(Roles = "SuperAdmin,BrandAdmin,HotelManager,Receptionist")]
+        [HttpPost("{id}/change-room")]
+        public async Task<ActionResult<ApiResponseDto<BookingDto>>> ChangeRoom(Guid id, [FromBody] ChangeRoomRequestDto request)
+        {
+            try
+            {
+                var result = await _bookingService.ChangeRoomAsync(id, request);
+                return Ok(new ApiResponseDto<BookingDto>
+                {
+                    Success = true,
+                    Message = "Room changed successfully",
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponseDto<BookingDto>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        // ============ Late Checkout ============
+
+        [Authorize(Roles = "SuperAdmin,BrandAdmin,HotelManager,Receptionist")]
+        [HttpPost("{id}/late-checkout/calculate")]
+        public async Task<ActionResult<ApiResponseDto<LateCheckoutResponseDto>>> CalculateLateCheckout(Guid id, [FromBody] LateCheckoutRequestDto request)
+        {
+            try
+            {
+                var result = await _bookingService.CalculateLateCheckoutFeeAsync(id, request);
+                return Ok(new ApiResponseDto<LateCheckoutResponseDto>
+                {
+                    Success = true,
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponseDto<LateCheckoutResponseDto>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [Authorize(Roles = "SuperAdmin,BrandAdmin,HotelManager,Receptionist")]
+        [HttpPost("{id}/late-checkout")]
+        public async Task<ActionResult<ApiResponseDto<LateCheckoutResponseDto>>> ProcessLateCheckout(Guid id, [FromBody] LateCheckoutRequestDto request)
+        {
+            try
+            {
+                var result = await _bookingService.ProcessLateCheckoutAsync(id, request);
+                return Ok(new ApiResponseDto<LateCheckoutResponseDto>
+                {
+                    Success = true,
+                    Message = "Late checkout processed successfully",
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponseDto<LateCheckoutResponseDto>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        // ============ Additional Charges ============
+
+        [Authorize(Roles = "SuperAdmin,BrandAdmin,HotelManager,Receptionist")]
+        [HttpGet("{id}/charges")]
+        public async Task<ActionResult<ApiResponseDto<IEnumerable<AdditionalChargeDto>>>> GetAdditionalCharges(Guid id)
+        {
+            var charges = await _bookingService.GetAdditionalChargesAsync(id);
+            return Ok(new ApiResponseDto<IEnumerable<AdditionalChargeDto>>
+            {
+                Success = true,
+                Data = charges
+            });
+        }
+
+        [Authorize(Roles = "SuperAdmin,BrandAdmin,HotelManager,Receptionist")]
+        [HttpPost("charges")]
+        public async Task<ActionResult<ApiResponseDto<AdditionalChargeDto>>> AddAdditionalCharge([FromBody] CreateAdditionalChargeDto request)
+        {
+            try
+            {
+                var result = await _bookingService.AddAdditionalChargeAsync(request);
+                return Ok(new ApiResponseDto<AdditionalChargeDto>
+                {
+                    Success = true,
+                    Message = "Additional charge added successfully",
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponseDto<AdditionalChargeDto>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [Authorize(Roles = "SuperAdmin,BrandAdmin,HotelManager,Receptionist")]
+        [HttpDelete("charges/{chargeId}")]
+        public async Task<ActionResult<ApiResponseDto<bool>>> RemoveAdditionalCharge(Guid chargeId)
+        {
+            var result = await _bookingService.RemoveAdditionalChargeAsync(chargeId);
             return Ok(new ApiResponseDto<bool>
             {
                 Success = result,
-                Message = result ? "Check-out successful" : "Failed to check out",
+                Message = result ? "Charge removed successfully" : "Failed to remove charge",
                 Data = result
             });
         }

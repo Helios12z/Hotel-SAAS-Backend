@@ -1,9 +1,11 @@
+using Hotel_SAAS_Backend.API.Data;
 using Hotel_SAAS_Backend.API.Interfaces.Repositories;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Mapping;
 using Hotel_SAAS_Backend.API.Models.DTOs;
 using Hotel_SAAS_Backend.API.Models.Entities;
 using Hotel_SAAS_Backend.API.Models.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hotel_SAAS_Backend.API.Services
 {
@@ -11,7 +13,8 @@ namespace Hotel_SAAS_Backend.API.Services
         IBookingRepository bookingRepository,
         IRoomRepository roomRepository,
         IPromotionService promotionService,
-        IPromotionRepository promotionRepository) : IBookingService
+        IPromotionRepository promotionRepository,
+        ApplicationDbContext context) : IBookingService
     {
         public async Task<BookingDto?> GetBookingByIdAsync(Guid id)
         {
@@ -198,13 +201,38 @@ namespace Hotel_SAAS_Backend.API.Services
             return true;
         }
 
-        public async Task<bool> CheckOutAsync(Guid id)
+        public async Task<CheckOutResponseDto> CheckOutAsync(Guid id, CheckOutRequestDto? request = null)
         {
-            var booking = await bookingRepository.GetByIdAsync(id);
-            if (booking == null) return false;
+            var booking = await bookingRepository.GetByIdWithDetailsAsync(id);
+            if (booking == null) throw new Exception("Booking not found");
 
+            // Add additional charges from request
+            var additionalChargesTotal = 0m;
+            var charges = new List<AdditionalChargeDto>();
+
+            if (request?.AdditionalCharges != null)
+            {
+                foreach (var chargeDto in request.AdditionalCharges)
+                {
+                    var charge = new AdditionalCharge
+                    {
+                        Id = Guid.NewGuid(),
+                        BookingId = booking.Id,
+                        Type = chargeDto.Type,
+                        Description = chargeDto.Description,
+                        Amount = chargeDto.Amount,
+                        Notes = chargeDto.Notes,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    context.AdditionalCharges.Add(charge);
+                    additionalChargesTotal += chargeDto.Amount;
+                }
+            }
+
+            // Update booking
             booking.Status = BookingStatus.CheckedOut;
             booking.CheckedOutAt = DateTime.UtcNow;
+            booking.TotalAmount += additionalChargesTotal;
 
             // Update room status to cleaning
             foreach (var bookingRoom in booking.BookingRooms)
@@ -218,7 +246,40 @@ namespace Hotel_SAAS_Backend.API.Services
             }
 
             await bookingRepository.UpdateAsync(booking);
-            return true;
+            await context.SaveChangesAsync();
+
+            // Get updated charges
+            var updatedCharges = await context.AdditionalCharges
+                .Where(c => c.BookingId == booking.Id)
+                .ToListAsync();
+
+            charges = updatedCharges.Select(c => new AdditionalChargeDto
+            {
+                Id = c.Id,
+                Type = c.Type,
+                Description = c.Description,
+                Amount = c.Amount,
+                IsPaid = c.IsPaid,
+                PaidAt = c.PaidAt,
+                PaymentMethod = c.PaymentMethod,
+                CreatedAt = c.CreatedAt
+            }).ToList();
+
+            var amountPaid = booking.Payments.Where(p => p.Status == PaymentStatus.Completed).Sum(p => p.Amount);
+            var balanceDue = booking.TotalAmount - amountPaid;
+
+            return new CheckOutResponseDto
+            {
+                BookingId = booking.Id,
+                Status = booking.Status,
+                CheckedOutAt = booking.CheckedOutAt,
+                RoomCharges = booking.TotalAmount - additionalChargesTotal,
+                AdditionalCharges = additionalChargesTotal,
+                TotalAmount = booking.TotalAmount,
+                AmountPaid = amountPaid,
+                BalanceDue = balanceDue > 0 ? balanceDue : 0,
+                Charges = charges
+            };
         }
 
         public async Task<BookingCalculationDto> CalculatePriceAsync(CalculatePriceDto calculatePriceDto)
@@ -231,6 +292,186 @@ namespace Hotel_SAAS_Backend.API.Services
                 Rooms = calculatePriceDto.Rooms,
                 Currency = calculatePriceDto.Currency
             });
+        }
+
+        // ============ Change Room ============
+
+        public async Task<BookingDto> ChangeRoomAsync(Guid bookingId, ChangeRoomRequestDto request)
+        {
+            var booking = await bookingRepository.GetByIdWithDetailsAsync(bookingId);
+            if (booking == null) throw new Exception("Booking not found");
+
+            if (booking.Status != BookingStatus.CheckedIn)
+                throw new Exception("Can only change room for checked-in bookings");
+
+            var oldRoom = await roomRepository.GetByIdAsync(request.OldRoomId);
+            if (oldRoom == null) throw new Exception("Old room not found");
+
+            var newRoom = await roomRepository.GetByIdAsync(request.NewRoomId);
+            if (newRoom == null) throw new Exception("New room not found");
+
+            if (newRoom.Status != RoomStatus.Available)
+                throw new Exception("New room is not available");
+
+            // Update booking room
+            var bookingRoom = booking.BookingRooms.FirstOrDefault(br => br.RoomId == request.OldRoomId);
+            if (bookingRoom == null) throw new Exception("Booking room not found");
+
+            // Calculate price difference (simplified - using new room's base price)
+            var numberOfNights = (int)(booking.CheckOutDate - booking.CheckInDate).TotalDays;
+            var oldPrice = bookingRoom.Price;
+            var newPrice = newRoom.BasePrice * numberOfNights;
+            var priceDifference = newPrice - oldPrice;
+
+            // Update room statuses
+            oldRoom.Status = RoomStatus.Cleaning;
+            newRoom.Status = RoomStatus.Occupied;
+
+            bookingRoom.RoomId = request.NewRoomId;
+            bookingRoom.RoomNumber = newRoom.RoomNumber;
+            bookingRoom.Price = newPrice;
+            booking.TotalAmount += priceDifference;
+
+            await roomRepository.UpdateAsync(oldRoom);
+            await roomRepository.UpdateAsync(newRoom);
+            await bookingRepository.UpdateAsync(booking);
+
+            return Mapper.ToDto(booking);
+        }
+
+        // ============ Late Checkout ============
+
+        public async Task<LateCheckoutResponseDto> CalculateLateCheckoutFeeAsync(Guid bookingId, LateCheckoutRequestDto request)
+        {
+            var booking = await bookingRepository.GetByIdWithDetailsAsync(bookingId);
+            if (booking == null) throw new Exception("Booking not found");
+
+            if (booking.Status != BookingStatus.CheckedIn)
+                throw new Exception("Can only calculate late checkout for checked-in bookings");
+
+            var originalCheckOut = booking.CheckOutDate;
+            var newCheckOut = request.NewCheckOutTime;
+
+            if (newCheckOut <= originalCheckOut)
+                throw new Exception("New check-out time must be after original check-out time");
+
+            // Calculate extra hours (minimum 1 hour, maximum 24 hours)
+            var extraHours = (int)Math.Ceiling((newCheckOut - originalCheckOut).TotalHours);
+            extraHours = Math.Max(1, Math.Min(24, extraHours));
+
+            // Calculate late fee (10% of daily rate per hour, max 50% of daily rate)
+            var mainRoom = booking.BookingRooms.FirstOrDefault();
+            if (mainRoom == null) throw new Exception("No rooms in booking");
+
+            var dailyRate = mainRoom.Price / (int)(booking.CheckOutDate - booking.CheckInDate).TotalDays;
+            dailyRate = Math.Max(dailyRate, mainRoom.Room != null ? mainRoom.Room.BasePrice : dailyRate);
+
+            var hourlyRate = dailyRate * 0.10m; // 10% per hour
+            var maxLateFee = dailyRate * 0.50m; // Max 50% of daily rate
+            var lateFeeAmount = Math.Min(hourlyRate * extraHours, maxLateFee);
+
+            return new LateCheckoutResponseDto
+            {
+                LateFeeAmount = lateFeeAmount,
+                ExtraHours = extraHours,
+                HourlyRate = hourlyRate,
+                OriginalCheckOut = originalCheckOut,
+                NewCheckOut = newCheckOut,
+                OriginalTotal = booking.TotalAmount,
+                NewTotal = booking.TotalAmount + lateFeeAmount
+            };
+        }
+
+        public async Task<LateCheckoutResponseDto> ProcessLateCheckoutAsync(Guid bookingId, LateCheckoutRequestDto request)
+        {
+            // First calculate the fee
+            var feeCalculation = await CalculateLateCheckoutFeeAsync(bookingId, request);
+
+            var booking = await bookingRepository.GetByIdWithDetailsAsync(bookingId);
+            if (booking == null) throw new Exception("Booking not found");
+
+            // Add late fee as additional charge
+            var lateFeeCharge = new AdditionalCharge
+            {
+                Id = Guid.NewGuid(),
+                BookingId = bookingId,
+                Type = "LateCheckout",
+                Description = $"Late checkout fee: {request.NewCheckOutTime:HH:mm} ({feeCalculation.ExtraHours} hours late)",
+                Amount = feeCalculation.LateFeeAmount,
+                Notes = request.Reason,
+                CreatedAt = DateTime.UtcNow
+            };
+            context.AdditionalCharges.Add(lateFeeCharge);
+
+            // Update booking check-out date
+            booking.CheckOutDate = request.NewCheckOutTime;
+            booking.TotalAmount += feeCalculation.LateFeeAmount;
+
+            await bookingRepository.UpdateAsync(booking);
+            await context.SaveChangesAsync();
+
+            return feeCalculation;
+        }
+
+        // ============ Additional Charges ============
+
+        public async Task<AdditionalChargeDto> AddAdditionalChargeAsync(CreateAdditionalChargeDto request)
+        {
+            var charge = new AdditionalCharge
+            {
+                Id = Guid.NewGuid(),
+                BookingId = request.BookingId,
+                Type = request.Type,
+                Description = request.Description,
+                Amount = request.Amount,
+                Notes = request.Notes,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            context.AdditionalCharges.Add(charge);
+            await context.SaveChangesAsync();
+
+            return new AdditionalChargeDto
+            {
+                Id = charge.Id,
+                Type = charge.Type,
+                Description = charge.Description,
+                Amount = charge.Amount,
+                IsPaid = charge.IsPaid,
+                PaidAt = charge.PaidAt,
+                PaymentMethod = charge.PaymentMethod,
+                CreatedAt = charge.CreatedAt
+            };
+        }
+
+        public async Task<IEnumerable<AdditionalChargeDto>> GetAdditionalChargesAsync(Guid bookingId)
+        {
+            var charges = await context.AdditionalCharges
+                .Where(c => c.BookingId == bookingId)
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync();
+
+            return charges.Select(c => new AdditionalChargeDto
+            {
+                Id = c.Id,
+                Type = c.Type,
+                Description = c.Description,
+                Amount = c.Amount,
+                IsPaid = c.IsPaid,
+                PaidAt = c.PaidAt,
+                PaymentMethod = c.PaymentMethod,
+                CreatedAt = c.CreatedAt
+            });
+        }
+
+        public async Task<bool> RemoveAdditionalChargeAsync(Guid chargeId)
+        {
+            var charge = await context.AdditionalCharges.FindAsync(chargeId);
+            if (charge == null) return false;
+
+            context.AdditionalCharges.Remove(charge);
+            await context.SaveChangesAsync();
+            return true;
         }
 
         private async Task<BookingCalculationDto> CalculatePriceInternalAsync(CreateBookingDto bookingDto)

@@ -122,4 +122,112 @@ namespace Hotel_SAAS_Backend.API.Models.DTOs
         public decimal TotalPrice { get; set; }
         public int NumberOfNights { get; set; }
     }
+
+    // ============ Additional Charge DTOs ============
+
+    public class AdditionalChargeDto
+    {
+        public Guid Id { get; set; }
+        public string Type { get; set; } = string.Empty; // LateCheckout, Minibar, RoomService, Damages, Other
+        public string Description { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+        public bool IsPaid { get; set; }
+        public DateTime? PaidAt { get; set; }
+        public string? PaymentMethod { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
+
+    public class CreateAdditionalChargeDto
+    {
+        public Guid BookingId { get; set; }
+        public string Type { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+        public string? Notes { get; set; }
+    }
+
+    // ============ Change Room DTOs ============
+
+    public class ChangeRoomRequestDto
+    {
+        public Guid OldRoomId { get; set; }
+        public Guid NewRoomId { get; set; }
+        public string? Reason { get; set; }
+    }
+
+    // ============ Late Checkout DTOs ============
+
+    public class LateCheckoutRequestDto
+    {
+        public DateTime NewCheckOutTime { get; set; } // New check-out date/time
+        public string? Reason { get; set; }
+    }
+
+    public class LateCheckoutResponseDto
+    {
+        public decimal LateFeeAmount { get; set; }
+        public int ExtraHours { get; set; }
+        public decimal HourlyRate { get; set; }
+        public DateTime OriginalCheckOut { get; set; }
+        public DateTime NewCheckOut { get; set; }
+        public decimal OriginalTotal { get; set; }
+        public decimal NewTotal { get; set; }
+    }
+
+    // ============ Enhanced CheckOut DTOs ============
+
+    public class CheckOutRequestDto
+    {
+        public List<CreateAdditionalChargeDto>? AdditionalCharges { get; set; }
+        public string? PaymentMethod { get; set; } // Cash, Card, VNPay, etc.
+        public string? Notes { get; set; }
+    }
+
+    public class CheckOutResponseDto
+    {
+        public Guid BookingId { get; set; }
+        public BookingStatus Status { get; set; }
+        public DateTime? CheckedOutAt { get; set; }
+        public decimal RoomCharges { get; set; }
+        public decimal AdditionalCharges { get; set; }
+        public decimal TotalAmount { get; set; }
+        public decimal AmountPaid { get; set; }
+        public decimal BalanceDue { get; set; }
+        public List<AdditionalChargeDto> Charges { get; set; } = new();
+    }
+
+    // ============ Room Status DTOs ============
+
+    public class RoomStatusReportDto
+    {
+        public Guid RoomId { get; set; }
+        public string RoomNumber { get; set; } = string.Empty;
+        public RoomStatus CurrentStatus { get; set; }
+        public RoomStatus NewStatus { get; set; }
+        public string? Reason { get; set; }
+    }
+
+    public class RoomMaintenanceReportDto
+    {
+        public Guid RoomId { get; set; }
+        public string Issue { get; set; } = string.Empty; // Plumbing, Electrical, Cleaning, Damages, Other
+        public string Description { get; set; } = string.Empty;
+        public string Priority { get; set; } = "Medium"; // Low, Medium, High, Urgent
+        public string? ReportedBy { get; set; }
+    }
+
+    // ============ Available Rooms Filter DTO ============
+
+    public class AvailableRoomsFilterDto
+    {
+        public DateTime CheckIn { get; set; }
+        public DateTime CheckOut { get; set; }
+        public RoomType? Type { get; set; }
+        public int? MinOccupancy { get; set; }
+        public decimal? MinPrice { get; set; }
+        public decimal? MaxPrice { get; set; }
+        public bool ExcludeMaintenance { get; set; } = true;
+        public bool ExcludeCleaning { get; set; } = true;
+        public bool ExcludeOutOfOrder { get; set; } = true;
+    }
 }

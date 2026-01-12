@@ -1,14 +1,42 @@
 # Module 10: Dashboard & Analytics (Partner Portal)
 
+## Authorization & Permissions
+
+> **Hệ thống phân quyền động**: Sử dụng `[Authorize(Policy = "Permission:xxx")]` thay vì role-based cứng
+
+### Permission Policies
+
+| Policy | Mô tả | Cho phép |
+|--------|-------|----------|
+| `Permission:dashboard.view` | Xem dashboard | HotelManager, Receptionist |
+| `Permission:dashboard.viewall` | Xem dashboard toàn hệ thống | SuperAdmin |
+
+### Role-Based Access Matrix
+
+| Action | SuperAdmin | BrandAdmin | HotelManager | Receptionist | Staff |
+|--------|------------|------------|--------------|--------------|-------|
+| Xem system dashboard | ✅ (viewall) | ❌ | ❌ | ❌ | ❌ |
+| Xem brand dashboard | ✅ | ✅ (own) | ❌ | ❌ | ❌ |
+| Xem hotel dashboard | ✅ | ❌ | ✅ | ✅ | ✅ |
+
+### Dashboard Scope Logic
+
+Backend sử dụng `PermissionContext` để xác định dashboard scope:
+- **SuperAdmin**: Trả về system-wide stats (tất cả brands, hotels)
+- **BrandAdmin**: Trả về brand stats (hotels trong brand của mình)
+- **HotelManager/Receptionist**: Trả về hotel stats (hotel được assign)
+
+---
+
 ## Screens
 
-| Screen | Route | M� t? |
+| Screen | Route | M� t? |
 |--------|-------|-------|
-| Dashboard | `/manage/dashboard` | T?ng quan c�c metrics |
-| Revenue Analytics | `/manage/analytics/revenue` | Ph�n t�ch doanh thu |
-| Occupancy Analytics | `/manage/analytics/occupancy` | Ph�n t�ch c�ng su?t |
-| Booking Analytics | `/manage/analytics/bookings` | Ph�n t�ch bookings |
-| Guest Analytics | `/manage/analytics/guests` | Ph�n t�ch kh�ch h�ng |
+| Dashboard | `/manage/dashboard` | T?ng quan c�c metrics |
+| Revenue Analytics | `/manage/analytics/revenue` | Ph�n t�ch doanh thu |
+| Occupancy Analytics | `/manage/analytics/occupancy` | Ph�n t�ch c�ng su?t |
+| Booking Analytics | `/manage/analytics/bookings` | Ph�n t�ch bookings |
+| Guest Analytics | `/manage/analytics/guests` | Ph�n t�ch kh�ch h�ng |
 
 ---
 
@@ -19,9 +47,15 @@
 GET /api/dashboard/overview
 Authorization: Bearer {token}
 ```
+**Required Policy:** `Permission:dashboard.view` (HotelManager/Receptionist) hoặc `Permission:dashboard.viewall` (SuperAdmin)
+
+**Scope Logic:** Response trả về data dựa trên role của user:
+- SuperAdmin: System-wide stats
+- BrandAdmin: Brand-level stats
+- HotelManager/Receptionist: Hotel-level stats
 
 **Query Parameters:**
-| Param | Type | Default | M� t? |
+| Param | Type | Default | M� t? |
 |-------|------|---------|-------|
 | `hotelId` | uuid | - | Filter by hotel (optional) |
 | `period` | string | today | `today`, `week`, `month`, `year` |
@@ -81,6 +115,7 @@ Authorization: Bearer {token}
 GET /api/dashboard/revenue
 Authorization: Bearer {token}
 ```
+**Required Policy:** `Permission:dashboard.view`
 
 **Query Parameters:**
 | Param | Type | Default |
@@ -437,3 +472,22 @@ interface OccupancyChartPoint {
   availableRooms: number;
   bookedRooms: number;
 }
+
+// ============ PERMISSION TYPES ============
+
+interface UserPermissions {
+  permissions: string[];
+  scope: 'system' | 'brand' | 'hotel';
+  brandId?: string;
+  hotelId?: string;
+}
+
+interface DashboardScope {
+  scope: 'system' | 'brand' | 'hotel';
+  entityId?: string;
+}
+
+const PERMISSION_POLICIES = {
+  DASHBOARD_VIEW: 'Permission:dashboard.view',
+  DASHBOARD_VIEW_ALL: 'Permission:dashboard.viewall',
+} as const;
