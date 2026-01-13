@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Hotel_SAAS_Backend.API.Data;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using Hotel_SAAS_Backend.API.Models.Entities;
 using Hotel_SAAS_Backend.API.Services.Embedding;
 using Hotel_SAAS_Backend.API.Services.LLM;

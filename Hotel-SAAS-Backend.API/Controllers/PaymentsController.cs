@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.Constants;
 
 namespace Hotel_SAAS_Backend.API.Controllers
 {

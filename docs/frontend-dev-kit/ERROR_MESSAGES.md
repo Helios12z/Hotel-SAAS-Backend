@@ -131,8 +131,28 @@ Tài liệu này liệt kê TOÀN BỘ các hằng số thông báo được đ�
 | `Subscription.CanAddUser` | Bạn có thể thêm người dùng mới |
 | `Subscription.ExistingBrandNotFound` | Không tìm thấy thương hiệu hiện có |
 | `Subscription.BookingNotFound` | Không tìm thấy thông tin đặt phòng |
+| `Subscription.BrandNotFound` | Không tìm thấy thương hiệu |
+| `Subscription.BrandCreated` | Tạo thương hiệu thành công |
+| `Subscription.BrandUpdated` | Cập nhật thương hiệu thành công |
+| `Subscription.BrandIdRequired` | Mã thương hiệu (Brand ID) là bắt buộc |
+| `Subscription.BrandAlreadyHasSubscription` | Thương hiệu này đã có gói dịch vụ đang hoạt động |
+| `Subscription.PlanNotFound` | Không tìm thấy gói cước |
 
-## 7. Hồ sơ Hợp tác (Onboarding)
+## 7. Phòng (Room)
+| Key | Nội dung (Tiếng Việt) |
+|-----|----------------------|
+| `Room.NotFound` | Không tìm thấy phòng |
+| `Room.Created` | Tạo phòng thành công |
+| `Room.Updated` | Cập nhật thông tin phòng thành công |
+| `Room.Deleted` | Xóa phòng thành công |
+| `Room.DeleteFailed` | Xóa phòng thất bại |
+| `Room.StatusUpdated` | Cập nhật trạng thái phòng thành công |
+| `Room.StatusUpdateFailed` | Cập nhật trạng thái phòng thất bại |
+| `Room.MaintenanceReported` | Báo cáo bảo trì thành công |
+| `Room.MaintenanceReportFailed` | Báo cáo bảo trì thất bại |
+| `Room.MarkedAvailable` | Đã đánh dấu phòng sẵn sàng |
+
+## 8. Hồ sơ Hợp tác (Onboarding)
 | Key | Nội dung (Tiếng Việt) |
 |-----|----------------------|
 | `Onboarding.Created` | Tạo hồ sơ đăng ký thành công. Vui lòng hoàn tất thông tin và tải lên tài liệu cần thiết. |
@@ -162,7 +182,7 @@ Tài liệu này liệt kê TOÀN BỘ các hằng số thông báo được đ�
 | `Onboarding.ApprovedTitle` | 🎉 Chúc mừng! Hồ sơ của bạn đã được phê duyệt |
 | `Onboarding.ApprovedMessage` | Khách sạn {0} của bạn đã được phê duyệt và hiện đã chính thức hoạt động trên hệ thống! |
 
-## 8. Khác & Hệ thống (Misc & System)
+## 9. Khác & Hệ thống (Misc & System)
 | Key | Nội dung (Tiếng Việt) |
 |-----|----------------------|
 | `Misc.SystemError` | Hệ thống gặp sự cố, vui lòng thử lại sau |

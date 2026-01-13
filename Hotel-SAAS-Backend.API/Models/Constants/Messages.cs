@@ -128,6 +128,28 @@ namespace Hotel_SAAS_Backend.API.Models.Constants
             public const string CanAddUser = "Bạn có thể thêm người dùng mới";
             public const string ExistingBrandNotFound = "Không tìm thấy thương hiệu hiện có";
             public const string BookingNotFound = "Không tìm thấy thông tin đặt phòng"; // For StripeService
+            // Brand-related messages
+            public const string BrandNotFound = "Không tìm thấy thương hiệu";
+            public const string BrandCreated = "Tạo thương hiệu thành công";
+            public const string BrandUpdated = "Cập nhật thương hiệu thành công";
+            public const string BrandIdRequired = "Mã thương hiệu (Brand ID) là bắt buộc";
+            public const string BrandAlreadyHasSubscription = "Thương hiệu này đã có gói dịch vụ đang hoạt động";
+            // Plan-related messages
+            public const string PlanNotFound = "Không tìm thấy gói cước";
+        }
+
+        public static class Room
+        {
+            public const string NotFound = "Không tìm thấy phòng";
+            public const string Created = "Tạo phòng thành công";
+            public const string Updated = "Cập nhật thông tin phòng thành công";
+            public const string Deleted = "Xóa phòng thành công";
+            public const string DeleteFailed = "Xóa phòng thất bại";
+            public const string StatusUpdated = "Cập nhật trạng thái phòng thành công";
+            public const string StatusUpdateFailed = "Cập nhật trạng thái phòng thất bại";
+            public const string MaintenanceReported = "Báo cáo bảo trì thành công";
+            public const string MaintenanceReportFailed = "Báo cáo bảo trì thất bại";
+            public const string MarkedAvailable = "Đã đánh dấu phòng sẵn sàng";
         }
 
         public static class Onboarding
