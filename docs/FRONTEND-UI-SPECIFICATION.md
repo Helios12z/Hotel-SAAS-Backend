@@ -4,17 +4,309 @@ Tài liệu này mô tả tất cả các màn hình, cấu trúc trang, API cal
 
 ---
 
+## 📁 ROUTE TREE (Next.js App Router)
+
+```
+src/
+├── app/
+│   ├── layout.tsx                    # Root layout (Providers, Theme)
+│   ├── page.tsx                      # / (Home page)
+│   ├── not-found.tsx                 # 404 page
+│   │
+│   ├── (public)/                     # Public routes (no auth required)
+│   │   ├── layout.tsx                # Public layout (Header only)
+│   │   │
+│   │   ├── hotels/
+│   │   │   ├── page.tsx              # /hotels (Hotel list)
+│   │   │   ├── loading.tsx
+│   │   │   ├── error.tsx
+│   │   │   └── [id]/
+│   │   │       ├── page.tsx          # /hotels/:id (Hotel detail)
+│   │   │       ├── loading.tsx
+│   │   │       └── book/
+│   │   │           └── page.tsx      # /hotels/:id/book (Booking flow)
+│   │   │
+│   │   ├── promotions/
+│   │   │   ├── page.tsx              # /promotions
+│   │   │   └── [id]/
+│   │   │       └── page.tsx          # /promotions/:id
+│   │   │
+│   │   ├── search/
+│   │   │   └── page.tsx              # /search (Advanced search)
+│   │   │
+│   │   └── bots/
+│   │       └── page.tsx              # /bots (AI Chatbot page)
+│   │
+│   ├── (auth)/                       # Auth routes
+│   │   ├── layout.tsx                # Auth layout (Centered card)
+│   │   │
+│   │   ├── login/
+│   │   │   └── page.tsx              # /auth/login
+│   │   │
+│   │   ├── register/
+│   │   │   └── page.tsx              # /auth/register
+│   │   │
+│   │   ├── forgot-password/
+│   │   │   └── page.tsx              # /auth/forgot-password
+│   │   │
+│   │   └── reset-password/
+│   │       └── page.tsx              # /auth/reset-password?token=xxx
+│   │
+│   ├── (guest)/                      # Guest routes (requires auth)
+│   │   ├── layout.tsx                # Guest layout (Header + User menu)
+│   │   │
+│   │   ├── profile/
+│   │   │   ├── page.tsx              # /profile
+│   │   │   ├── layout.tsx            # Profile tabs layout
+│   │   │   ├── info/
+│   │   │   │   └── page.tsx          # /profile/info
+│   │   │   ├── security/
+│   │   │   │   └── page.tsx          # /profile/security
+│   │   │   ├── payment/
+│   │   │   │   └── page.tsx          # /profile/payment
+│   │   │   ├── notifications/
+│   │   │   │   └── page.tsx          # /profile/notifications
+│   │   │   └── activity/
+│   │   │       └── page.tsx          # /profile/activity
+│   │   │
+│   │   ├── bookings/
+│   │   │   ├── page.tsx              # /bookings (My bookings list)
+│   │   │   └── [id]/
+│   │   │       └── page.tsx          # /bookings/:id (Booking detail)
+│   │   │
+│   │   ├── wishlist/
+│   │   │   └── page.tsx              # /wishlist
+│   │   │
+│   │   └── checkout/
+│   │       └── success/
+│   │           └── page.tsx          # /checkout/success?session_id=xxx
+│   │
+│   ├── dashboard/                    # Dashboard routes (Staff+)
+│   │   ├── layout.tsx                # Dashboard layout (Sidebar)
+│   │   ├── loading.tsx
+│   │   ├── error.tsx
+│   │   │
+│   │   ├── page.tsx                  # /dashboard (Overview)
+│   │   │
+│   │   ├── bookings/
+│   │   │   ├── page.tsx              # /dashboard/bookings
+│   │   │   ├── [id]/
+│   │   │   │   ├── page.tsx          # /dashboard/bookings/:id
+│   │   │   │   └── checkout/
+│   │   │   │       └── page.tsx      # /dashboard/bookings/:id/checkout
+│   │   │   └── create/
+│   │   │       └── page.tsx          # /dashboard/bookings/create
+│   │   │
+│   │   ├── checkin/
+│   │   │   └── page.tsx              # /dashboard/checkin
+│   │   │
+│   │   ├── rooms/
+│   │   │   ├── page.tsx              # /dashboard/rooms
+│   │   │   ├── [id]/
+│   │   │   │   └── page.tsx          # /dashboard/rooms/:id
+│   │   │   └── create/
+│   │   │       └── page.tsx          # /dashboard/rooms/create
+│   │   │
+│   │   ├── revenue/
+│   │   │   └── page.tsx              # /dashboard/revenue
+│   │   │
+│   │   ├── reports/
+│   │   │   ├── page.tsx              # /dashboard/reports
+│   │   │   ├── revenue/
+│   │   │   │   └── page.tsx          # /dashboard/reports/revenue
+│   │   │   ├── bookings/
+│   │   │   │   └── page.tsx          # /dashboard/reports/bookings
+│   │   │   ├── occupancy/
+│   │   │   │   └── page.tsx          # /dashboard/reports/occupancy
+│   │   │   └── inventory/
+│   │   │       └── page.tsx          # /dashboard/reports/inventory
+│   │   │
+│   │   ├── staff/
+│   │   │   ├── page.tsx              # /dashboard/staff
+│   │   │   └── [id]/
+│   │   │       └── page.tsx          # /dashboard/staff/:id
+│   │   │
+│   │   └── settings/
+│   │       ├── page.tsx              # /dashboard/settings
+│   │       ├── hotel/
+│   │       │   └── page.tsx          # /dashboard/settings/hotel
+│   │       ├── rooms/
+│   │       │   └── page.tsx          # /dashboard/settings/rooms
+│   │       ├── amenities/
+│   │       │   └── page.tsx          # /dashboard/settings/amenities
+│   │       ├── payment/
+│   │       │   └── page.tsx          # /dashboard/settings/payment
+│   │       └── policies/
+│   │           └── page.tsx          # /dashboard/settings/policies
+│   │
+│   ├── brand/                        # Brand Admin routes
+│   │   ├── layout.tsx                # Brand layout
+│   │   ├── page.tsx                  # /brand (Brand dashboard)
+│   │   │
+│   │   ├── hotels/
+│   │   │   ├── page.tsx              # /brand/hotels
+│   │   │   └── [id]/
+│   │   │       └── page.tsx          # /brand/hotels/:id
+│   │   │
+│   │   ├── subscriptions/
+│   │   │   ├── page.tsx              # /brand/subscriptions
+│   │   │   └── [id]/
+│   │   │       └── page.tsx          # /brand/subscriptions/:id
+│   │   │
+│   │   ├── users/
+│   │   │   ├── page.tsx              # /brand/users
+│   │   │   └── [id]/
+│   │   │       └── page.tsx          # /brand/users/:id
+│   │   │
+│   │   └── reports/
+│   │       └── page.tsx              # /brand/reports
+│   │
+│   ├── admin/                        # Super Admin routes
+│   │   ├── layout.tsx                # Admin layout
+│   │   ├── page.tsx                  # /admin (Admin dashboard)
+│   │   │
+│   │   ├── onboarding/
+│   │   │   ├── page.tsx              # /admin/onboarding
+│   │   │   └── [id]/
+│   │   │       └── page.tsx          # /admin/onboarding/:id
+│   │   │
+│   │   ├── brands/
+│   │   │   ├── page.tsx              # /admin/brands
+│   │   │   └── [id]/
+│   │   │       └── page.tsx          # /admin/brands/:id
+│   │   │
+│   │   ├── plans/
+│   │   │   ├── page.tsx              # /admin/plans
+│   │   │   └── [id]/
+│   │   │       └── page.tsx          # /admin/plans/:id
+│   │   │
+│   │   ├── users/
+│   │   │   ├── page.tsx              # /admin/users
+│   │   │   └── [id]/
+│   │   │       └── page.tsx          # /admin/users/:id
+│   │   │
+│   │   ├── reports/
+│   │   │   └── page.tsx              # /admin/reports
+│   │   │
+│   │   └── settings/
+│   │       └── page.tsx              # /admin/settings
+│   │
+│   └── api/
+│       ├── auth/
+│       │   ├── login/route.ts        # POST /api/auth/login
+│       │   ├── register/route.ts     # POST /api/auth/register
+│       │   ├── refresh/route.ts      # POST /api/auth/refresh-token
+│       │   ├── logout/route.ts       # POST /api/auth/logout
+│       │   └── ...
+│       ├── bookings/...
+│       ├── hotels/...
+│       └── ...
+│
+├── components/
+│   ├── ui/                           # Shadcn UI components
+│   ├── layout/
+│   │   ├── Header.tsx
+│   │   ├── Footer.tsx
+│   │   ├── Sidebar.tsx
+│   │   ├── DashboardLayout.tsx
+│   │   └── ...
+│   ├── hotel/
+│   │   ├── HotelCard.tsx
+│   │   ├── HotelList.tsx
+│   │   ├── HotelDetail.tsx
+│   │   ├── RoomCard.tsx
+│   │   └── ...
+│   ├── booking/
+│   │   ├── BookingCard.tsx
+│   │   ├── BookingForm.tsx
+│   │   ├── BookingSummary.tsx
+│   │   └── ...
+│   ├── dashboard/
+│   │   ├── StatsCard.tsx
+│   │   ├── RevenueChart.tsx
+│   │   ├── RoomGrid.tsx
+│   │   └── ...
+│   ├── common/
+│   │   ├── SearchBox.tsx
+│   │   ├── Filters.tsx
+│   │   ├── Modal.tsx
+│   │   ├── Toast.tsx
+│   │   └── ...
+│   └── ai/
+│       └── Chatbot.tsx
+│
+├── hooks/
+│   ├── useAuth.ts
+│   ├── useBooking.ts
+│   ├── useHotels.ts
+│   └── ...
+│
+├── lib/
+│   ├── api.ts                        # Axios instance
+│   ├── auth.ts                       # Auth utilities
+│   └── utils.ts                      # Helper functions
+│
+├── store/
+│   ├── authStore.ts                  # Zustand auth store
+│   └── uiStore.ts                    # Zustand UI store
+│
+└── types/
+    └── index.ts                      # TypeScript types
+```
+
+---
+
+## 🔗 QUICK REFERENCE: URL MAPPING
+
+| Route | Page | Roles | API Prefix |
+|-------|------|-------|------------|
+| `/` | Home | Public+ | - |
+| `/hotels` | Hotel List | Public+ | `/api/hotels` |
+| `/hotels/[id]` | Hotel Detail | Public+ | `/api/hotels/:id` |
+| `/hotels/[id]/book` | Booking Flow | Guest+ | `/api/bookings` |
+| `/promotions` | Promotions | Public+ | `/api/promotions` |
+| `/search` | Advanced Search | Public+ | `/api/hotels/search` |
+| `/bots` | AI Chatbot | Public+ | `/api/bot` |
+| `/auth/login` | Login | Public | `/api/auth/login` |
+| `/auth/register` | Register | Public | `/api/auth/register` |
+| `/auth/forgot-password` | Forgot Password | Public | `/api/auth/forgot-password` |
+| `/profile` | User Profile | Guest+ | `/api/users`, `/api/guest` |
+| `/bookings` | My Bookings | Guest+ | `/api/bookings/my-bookings` |
+| `/bookings/[id]` | Booking Detail | Guest+ | `/api/bookings/:id` |
+| `/wishlist` | Wishlist | Guest+ | `/api/wishlist` |
+| `/checkout/success` | Checkout Success | Guest+ | `/api/checkout` |
+| `/dashboard` | Hotel Dashboard | Staff+ | `/api/dashboard/hotel/:id` |
+| `/dashboard/bookings` | Booking Management | Staff+ | `/api/bookings/hotel/:id` |
+| `/dashboard/checkin` | Check-in/Check-out | Staff+ | `/api/bookings` |
+| `/dashboard/rooms` | Room Management | Staff+ | `/api/hotels/:id/rooms` |
+| `/dashboard/reports` | Reports | Staff+ | `/api/reports` |
+| `/dashboard/staff` | Staff Management | Manager+ | `/api/users` |
+| `/dashboard/settings` | Hotel Settings | Manager+ | `/api/hotels` |
+| `/brand` | Brand Dashboard | BrandAdmin+ | `/api/dashboard/brand/:id` |
+| `/brand/hotels` | Brand Hotels | BrandAdmin+ | `/api/hotels/brand/:id` |
+| `/brand/subscriptions` | Subscriptions | BrandAdmin+ | `/api/subscriptions` |
+| `/brand/users` | Brand Users | BrandAdmin+ | `/api/users` |
+| `/admin` | Admin Dashboard | SuperAdmin | - |
+| `/admin/onboarding` | Onboarding Review | SuperAdmin | `/api/onboarding/admin` |
+| `/admin/brands` | All Brands | SuperAdmin | `/api/brands` |
+| `/admin/plans` | Subscription Plans | SuperAdmin | `/api/subscription-plans` |
+| `/admin/users` | System Users | SuperAdmin | `/api/users` |
+
+---
+
 ## MỤC LỤC
 
-1. [Phân Quyền & Vai Trò](#1-phân-quyền--vai-trò)
-2. [Navigation Structure](#2-navigation-structure)
-3. [Public Pages (Không cần đăng nhập)](#3-public-pages-không-cần-đăng-nhập)
-4. [Auth Pages (Trang xác thực)](#4-auth-pages-trang-xác-thực)
-5. [Guest Pages (Khách - đã đăng nhập)](#5-guest-pages-khách---đã-đăng-nhập)
-6. [Receptionist/Staff Pages](#6-receptioniststaff-pages)
-7. [Hotel Manager Pages](#7-hotel-manager-pages)
-8. [Brand Admin Pages](#8-brand-admin-pages)
-9. [Super Admin Pages](#9-super-admin-pages)
+1. [Route Tree (Next.js)](#-route-tree-nextjs-app-router)
+2. [Quick Reference URL Mapping](#-quick-reference-url-mapping)
+3. [Phân Quyền & Vai Trò](#1-phân-quyền--vai-trò)
+4. [Navigation Structure](#2-navigation-structure)
+5. [Public Pages (Không cần đăng nhập)](#3-public-pages-không-cần-đăng-nhập)
+6. [Auth Pages (Trang xác thực)](#4-auth-pages-trang-xác-thực)
+7. [Guest Pages (Khách - đã đăng nhập)](#5-guest-pages-khách---đã-đăng-nhập)
+8. [Receptionist/Staff Pages](#6-receptioniststaff-pages)
+9. [Hotel Manager Pages](#7-hotel-manager-pages)
+10. [Brand Admin Pages](#8-brand-admin-pages)
+11. [Super Admin Pages](#9-super-admin-pages)
 
 ---
 
