@@ -200,11 +200,14 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Auto-apply migrations
+// Auto-apply migrations and seed data
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
+    
+    // Seed initial data
+    await SeedData.InitializeAsync(db);
 }
 
 // Configure the HTTP request pipeline

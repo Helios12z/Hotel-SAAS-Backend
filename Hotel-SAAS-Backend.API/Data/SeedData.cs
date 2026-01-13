@@ -192,7 +192,7 @@ namespace Hotel_SAAS_Backend.API.Data
             // ============================================
             var nyHotel = new Hotel
             {
-                Id = Guid.Parse("hhhhhhhh-hhhh-hhhh-hhhh-hhhhhhhhhhhh"),
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
                 BrandId = marriottBrand.Id,
                 Name = "Marriott Marquis Times Square",
                 Description = "Luxury hotel in the heart of Times Square with stunning city views, world-class dining, and exceptional service. Perfect for business travelers and tourists alike.",
@@ -221,8 +221,8 @@ namespace Hotel_SAAS_Backend.API.Data
                 CommissionRate = 15,
                 AverageRating = 4.5f,
                 ReviewCount = 2847,
-                YearBuilt = new DateTime(1985, 1, 1),
-                YearRenovated = new DateTime(2023, 1, 1),
+                YearBuilt = DateTime.SpecifyKind(new DateTime(1985, 1, 1), DateTimeKind.Utc),
+                YearRenovated = DateTime.SpecifyKind(new DateTime(2023, 1, 1), DateTimeKind.Utc),
                 Embedding = GenerateMockEmbedding(1024), // For AI search
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -232,7 +232,7 @@ namespace Hotel_SAAS_Backend.API.Data
 
             var laHotel = new Hotel
             {
-                Id = Guid.Parse("iiiiiiii-iiii-iiii-iiii-iiiiiiiiiiii"),
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000002"),
                 BrandId = marriottBrand.Id,
                 Name = "Marriott Burbank Airport Hotel",
                 Description = "Modern hotel conveniently located near Burbank Airport with complimentary shuttle, outdoor pool, fitness center, and meeting facilities.",
@@ -261,8 +261,8 @@ namespace Hotel_SAAS_Backend.API.Data
                 CommissionRate = 15,
                 AverageRating = 4.2f,
                 ReviewCount = 1243,
-                YearBuilt = new DateTime(1990, 1, 1),
-                YearRenovated = new DateTime(2021, 1, 1),
+                YearBuilt = DateTime.SpecifyKind(new DateTime(1990, 1, 1), DateTimeKind.Utc),
+                YearRenovated = DateTime.SpecifyKind(new DateTime(2021, 1, 1), DateTimeKind.Utc),
                 Embedding = GenerateMockEmbedding(1024),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -271,7 +271,7 @@ namespace Hotel_SAAS_Backend.API.Data
 
             var parisHotel = new Hotel
             {
-                Id = Guid.Parse("pppppppp-pppp-pppp-pppp-pppppppppppp"),
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000003"),
                 BrandId = hiltonBrand.Id,
                 Name = "Hilton Paris Opera",
                 Description = "Elegant 4-star hotel located in the heart of Paris, steps away from the Opera Garnier and major department stores. Classic French hospitality meets modern comfort.",
@@ -299,8 +299,8 @@ namespace Hotel_SAAS_Backend.API.Data
                 CommissionRate = 15,
                 AverageRating = 4.3f,
                 ReviewCount = 1876,
-                YearBuilt = new DateTime(1975, 1, 1),
-                YearRenovated = new DateTime(2022, 1, 1),
+                YearBuilt = DateTime.SpecifyKind(new DateTime(1975, 1, 1), DateTimeKind.Utc),
+                YearRenovated = DateTime.SpecifyKind(new DateTime(2022, 1, 1), DateTimeKind.Utc),
                 Embedding = GenerateMockEmbedding(1024),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
