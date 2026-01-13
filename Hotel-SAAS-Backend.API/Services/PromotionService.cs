@@ -42,7 +42,7 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<PromotionDto> CreateAsync(CreatePromotionDto dto)
         {
             if (await promotionRepository.CodeExistsAsync(dto.Code))
-                throw new InvalidOperationException("Promotion code already exists");
+                throw new InvalidOperationException(Hotel_SAAS_Backend.API.Models.Constants.Messages.Misc.PromotionExists);
 
             var promotion = Mapper.ToEntity(dto);
             var created = await promotionRepository.CreateAsync(promotion);
@@ -53,7 +53,7 @@ namespace Hotel_SAAS_Backend.API.Services
         {
             var promotion = await promotionRepository.GetByIdAsync(id);
             if (promotion == null)
-                throw new KeyNotFoundException("Promotion not found");
+                throw new KeyNotFoundException(Hotel_SAAS_Backend.API.Models.Constants.Messages.Misc.PromotionNotFound);
 
             Mapper.UpdateEntity(dto, promotion);
             var updated = await promotionRepository.UpdateAsync(promotion);
@@ -97,7 +97,7 @@ namespace Hotel_SAAS_Backend.API.Services
                 return new CouponValidationResultDto
                 {
                     IsValid = false,
-                    ErrorMessage = "Invalid coupon code"
+                    ErrorMessage = Hotel_SAAS_Backend.API.Models.Constants.Messages.Misc.CouponInvalid
                 };
             }
 
@@ -194,7 +194,7 @@ namespace Hotel_SAAS_Backend.API.Services
                     break;
             }
 
-            return Math.Min(discount, bookingAmount); // Discount không v??t quá booking amount
+            return Math.Min(discount, bookingAmount); // Discount khng v??t qu booking amount
         }
     }
 }

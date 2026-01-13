@@ -2,6 +2,7 @@ using Hotel_SAAS_Backend.API.Interfaces.Repositories;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Models.DTOs;
 using Hotel_SAAS_Backend.API.Models.Entities;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using Hotel_SAAS_Backend.API.Models.Enums;
 
 namespace Hotel_SAAS_Backend.API.Services
@@ -41,13 +42,13 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<SubscriptionDto> CreateAsync(CreateSubscriptionDto dto)
         {
             var plan = await planRepository.GetByIdAsync(dto.PlanId) 
-                ?? throw new Exception("Subscription plan not found");
+                ?? throw new Exception(Messages.Subscription.PlanNotFound);
 
             var brand = await brandRepository.GetByIdAsync(dto.BrandId) 
-                ?? throw new Exception("Brand not found");
+                ?? throw new Exception(Messages.Subscription.BrandNotFound);
 
             if (await subscriptionRepository.HasActiveSubscriptionAsync(dto.BrandId))
-                throw new Exception("Brand already has an active subscription");
+                throw new Exception(Messages.Subscription.BrandAlreadyHasSubscription);
 
             var price = GetPriceByBillingCycle(plan, dto.BillingCycle);
             var discountedPrice = price * (1 - dto.DiscountPercentage / 100);
@@ -86,7 +87,7 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<SubscriptionDto> UpdateAsync(Guid id, UpdateSubscriptionDto dto)
         {
             var subscription = await subscriptionRepository.GetByIdAsync(id) 
-                ?? throw new Exception("Subscription not found");
+                ?? throw new Exception(Messages.Subscription.NotFound);
 
             if (dto.BillingCycle.HasValue)
             {
@@ -111,10 +112,10 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<SubscriptionDto> ChangePlanAsync(Guid id, ChangeSubscriptionPlanDto dto)
         {
             var subscription = await subscriptionRepository.GetByIdAsync(id) 
-                ?? throw new Exception("Subscription not found");
+                ?? throw new Exception(Messages.Subscription.NotFound);
 
             var newPlan = await planRepository.GetByIdAsync(dto.NewPlanId) 
-                ?? throw new Exception("New subscription plan not found");
+                ?? throw new Exception(Messages.Subscription.NewPlanNotFound);
 
             var billingCycle = dto.NewBillingCycle ?? subscription.BillingCycle;
             var newPrice = GetPriceByBillingCycle(newPlan, billingCycle);
@@ -131,7 +132,7 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<bool> CancelAsync(Guid id, CancelSubscriptionDto dto)
         {
             var subscription = await subscriptionRepository.GetByIdAsync(id) 
-                ?? throw new Exception("Subscription not found");
+                ?? throw new Exception(Messages.Subscription.NotFound);
 
             subscription.CancellationReason = dto.Reason;
             subscription.CancelledAt = DateTime.UtcNow;
@@ -152,10 +153,10 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<bool> RenewAsync(Guid id)
         {
             var subscription = await subscriptionRepository.GetByIdAsync(id) 
-                ?? throw new Exception("Subscription not found");
+                ?? throw new Exception(Messages.Subscription.NotFound);
 
             var plan = await planRepository.GetByIdAsync(subscription.PlanId);
-            if (plan == null) throw new Exception("Subscription plan not found");
+            if (plan == null) throw new Exception(Messages.Subscription.PlanNotFound);
 
             subscription.StartDate = DateTime.UtcNow;
             subscription.EndDate = CalculateEndDate(DateTime.UtcNow, subscription.BillingCycle);
@@ -189,7 +190,7 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<SubscriptionInvoiceDto> CreateInvoiceAsync(Guid subscriptionId)
         {
             var subscription = await subscriptionRepository.GetByIdAsync(subscriptionId) 
-                ?? throw new Exception("Subscription not found");
+                ?? throw new Exception(Messages.Subscription.NotFound);
 
             var invoiceNumber = await invoiceRepository.GenerateInvoiceNumberAsync();
             var taxRate = 0.1m; // 10% tax, should be configurable
@@ -216,7 +217,7 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<bool> PayInvoiceAsync(Guid invoiceId, PayInvoiceDto dto)
         {
             var invoice = await invoiceRepository.GetByIdAsync(invoiceId) 
-                ?? throw new Exception("Invoice not found");
+                ?? throw new Exception(Messages.Subscription.InvoiceNotFound);
 
             invoice.Status = InvoiceStatus.Paid;
             invoice.PaidAt = DateTime.UtcNow;

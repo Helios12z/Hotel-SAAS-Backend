@@ -47,7 +47,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<HotelDto>
                 {
                     Success = false,
-                    Message = "Hotel not found"
+                    Message = Messages.Hotel.NotFound
                 });
             }
 
@@ -68,7 +68,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<HotelDetailDto>
                 {
                     Success = false,
-                    Message = "Hotel not found"
+                    Message = Messages.Hotel.NotFound
                 });
             }
 
@@ -117,7 +117,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return BadRequest(new ApiResponseDto<HotelAvailabilityDto>
                 {
                     Success = false,
-                    Message = "Check-out date must be after check-in date"
+                    Message = Messages.Hotel.InvalidDates
                 });
             }
 
@@ -126,7 +126,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return BadRequest(new ApiResponseDto<HotelAvailabilityDto>
                 {
                     Success = false,
-                    Message = "Check-in date cannot be in the past"
+                    Message = Messages.Hotel.CheckInPast
                 });
             }
 
@@ -143,7 +143,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<HotelAvailabilityDto>
                 {
                     Success = false,
-                    Message = "Hotel not found"
+                    Message = Messages.Hotel.NotFound
                 });
             }
 
@@ -166,7 +166,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return StatusCode(StatusCodes.Status403Forbidden, new ApiResponseDto<HotelDto>
                 {
                     Success = false,
-                    Message = "Only BrandAdmin can create hotels"
+                    Message = Messages.Hotel.BrandAdminOnly
                 });
             }
 
@@ -180,7 +180,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return BadRequest(new ApiResponseDto<HotelDto>
                 {
                     Success = false,
-                    Message = "Brand ID is required"
+                    Message = Messages.Hotel.BrandIdRequired
                 });
             }
 
@@ -190,7 +190,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return CreatedAtAction(nameof(GetHotelById), new { id = hotel.Id }, new ApiResponseDto<HotelDto>
                 {
                     Success = true,
-                    Message = "Hotel created successfully",
+                    Message = Messages.Hotel.Created,
                     Data = hotel
                 });
             }
@@ -220,7 +220,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<HotelDto>
                 {
                     Success = true,
-                    Message = "Hotel updated successfully",
+                    Message = Messages.Hotel.Updated,
                     Data = hotel
                 });
             }
@@ -244,7 +244,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return StatusCode(StatusCodes.Status403Forbidden, new ApiResponseDto<bool>
                 {
                     Success = false,
-                    Message = "Only BrandAdmin can delete hotels"
+                    Message = Messages.Hotel.BrandAdminOnly
                 });
             }
 
@@ -252,7 +252,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = result,
-                Message = result ? "Hotel deleted successfully" : "Failed to delete hotel",
+                Message = result ? Messages.Hotel.Deleted : Messages.Hotel.DeleteFailed,
                 Data = result
             });
         }

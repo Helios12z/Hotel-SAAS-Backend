@@ -2,6 +2,7 @@ using Hotel_SAAS_Backend.API.Interfaces.Repositories;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Mapping;
 using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using Hotel_SAAS_Backend.API.Models.Entities;
 using Hotel_SAAS_Backend.API.Models.Enums;
 
@@ -49,7 +50,7 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<HotelDto> UpdateHotelAsync(Guid id, UpdateHotelDto updateHotelDto)
         {
             var hotel = await hotelRepository.GetByIdAsync(id);
-            if (hotel == null) throw new Exception("Hotel not found");
+            if (hotel == null) throw new Exception(Messages.Hotel.NotFound);
 
             Mapper.UpdateEntity(updateHotelDto, hotel);
             var updatedHotel = await hotelRepository.UpdateAsync(hotel);

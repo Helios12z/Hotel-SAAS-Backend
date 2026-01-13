@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using Hotel_SAAS_Backend.API.Models.Enums;
 
 namespace Hotel_SAAS_Backend.API.Controllers
@@ -37,7 +38,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<RoomDetailDto>
                 {
                     Success = false,
-                    Message = "Room not found"
+                    Message = Messages.Room.NotFound
                 });
             }
 
@@ -74,7 +75,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<RoomDto>
                 {
                     Success = true,
-                    Message = "Room created successfully",
+                    Message = Messages.Room.Created,
                     Data = room
                 });
             }
@@ -98,7 +99,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<RoomDto>
                 {
                     Success = true,
-                    Message = "Room updated successfully",
+                    Message = Messages.Room.Updated,
                     Data = room
                 });
             }
@@ -120,7 +121,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = result,
-                Message = result ? "Room status updated" : "Failed to update room status",
+                Message = result ? Messages.Room.StatusUpdated : Messages.Room.StatusUpdateFailed,
                 Data = result
             });
         }
@@ -133,7 +134,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = result,
-                Message = result ? "Room deleted successfully" : "Failed to delete room",
+                Message = result ? Messages.Room.Deleted : Messages.Room.DeleteFailed,
                 Data = result
             });
         }
@@ -173,7 +174,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = result,
-                Message = result ? "Maintenance reported successfully" : "Failed to report maintenance",
+                Message = result ? Messages.Room.MaintenanceReported : Messages.Room.MaintenanceReportFailed,
                 Data = result
             });
         }
@@ -188,7 +189,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<RoomDto>
                 {
                     Success = true,
-                    Message = "Room marked as available",
+                    Message = Messages.Room.MarkedAvailable,
                     Data = room
                 });
             }

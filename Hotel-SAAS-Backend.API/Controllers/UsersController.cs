@@ -6,6 +6,7 @@ using Hotel_SAAS_Backend.API.Models.DTOs;
 using Hotel_SAAS_Backend.API.Models.Entities;
 using Hotel_SAAS_Backend.API.Models.Enums;
 using Hotel_SAAS_Backend.API.Services;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using System.Security.Claims;
 
 namespace Hotel_SAAS_Backend.API.Controllers
@@ -41,7 +42,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return BadRequest(new ApiResponseDto<UserDto>
                 {
                     Success = false,
-                    Message = "Email is required"
+                    Message = Messages.Auth.EmailRequired
                 });
             }
 
@@ -53,7 +54,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                     return StatusCode(StatusCodes.Status403Forbidden, new ApiResponseDto<UserDto>
                     {
                         Success = false,
-                        Message = "SuperAdmin can only create BrandAdmin accounts"
+                        Message = Messages.User.SuperAdminOnlyBrandAdmin
                     });
                 }
 
@@ -62,7 +63,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                     return BadRequest(new ApiResponseDto<UserDto>
                     {
                         Success = false,
-                        Message = "BrandId is required when creating BrandAdmin"
+                        Message = Messages.User.BrandIdRequiredForBrandAdmin
                     });
                 }
 
@@ -71,7 +72,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return CreatedAtAction(nameof(GetUserById), new { id = brandAdminUser.Id }, new ApiResponseDto<UserDto>
                 {
                     Success = true,
-                    Message = "BrandAdmin created successfully",
+                    Message = Messages.User.BrandAdminCreated,
                     Data = brandAdminUser
                 });
             }
@@ -84,7 +85,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                     return StatusCode(StatusCodes.Status403Forbidden, new ApiResponseDto<UserDto>
                     {
                         Success = false,
-                        Message = "BrandAdmin can only create HotelManager accounts"
+                        Message = Messages.User.BrandAdminOnlyHotelManager
                     });
                 }
 
@@ -94,7 +95,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                     return BadRequest(new ApiResponseDto<UserDto>
                     {
                         Success = false,
-                        Message = "BrandId is required"
+                        Message = Messages.Subscription.BrandIdRequired
                     });
                 }
 
@@ -103,7 +104,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                     return StatusCode(StatusCodes.Status403Forbidden, new ApiResponseDto<UserDto>
                     {
                         Success = false,
-                        Message = "Cannot create user for a different brand"
+                        Message = Messages.User.CannotCreateForDifferentBrand
                     });
                 }
 
@@ -113,7 +114,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                     return BadRequest(new ApiResponseDto<UserDto>
                     {
                         Success = false,
-                        Message = "HotelId is required when creating HotelManager"
+                        Message = Messages.User.HotelIdRequiredForHotelManager
                     });
                 }
 
@@ -122,7 +123,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return CreatedAtAction(nameof(GetUserById), new { id = hotelManagerUser.Id }, new ApiResponseDto<UserDto>
                 {
                     Success = true,
-                    Message = "HotelManager created successfully",
+                    Message = Messages.User.HotelManagerCreated,
                     Data = hotelManagerUser
                 });
             }
@@ -135,7 +136,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                     return StatusCode(StatusCodes.Status403Forbidden, new ApiResponseDto<UserDto>
                     {
                         Success = false,
-                        Message = "HotelManager can only create Receptionist or Staff accounts"
+                        Message = Messages.User.HotelManagerOnlyStaff
                     });
                 }
 
@@ -145,7 +146,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                     return BadRequest(new ApiResponseDto<UserDto>
                     {
                         Success = false,
-                        Message = "HotelId is required"
+                        Message = Messages.Hotel.HotelIdRequired
                     });
                 }
 
@@ -155,7 +156,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                     return StatusCode(StatusCodes.Status403Forbidden, new ApiResponseDto<UserDto>
                     {
                         Success = false,
-                        Message = "Cannot create user for a different hotel"
+                        Message = Messages.User.CannotCreateForDifferentHotel
                     });
                 }
 
@@ -173,7 +174,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return StatusCode(StatusCodes.Status403Forbidden, new ApiResponseDto<UserDto>
             {
                 Success = false,
-                Message = "You do not have permission to create users"
+                Message = Messages.User.NoPermission
             });
         }
 
@@ -264,7 +265,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<UserDto>
                 {
                     Success = false,
-                    Message = "User not found"
+                    Message = Messages.User.NotFound
                 });
             }
 
@@ -291,7 +292,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                     return NotFound(new ApiResponseDto<UserDto>
                     {
                         Success = false,
-                        Message = "User not found"
+                        Message = Messages.User.NotFound
                     });
                 }
 
@@ -309,7 +310,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<UserDto>
                 {
                     Success = false,
-                    Message = "User not found"
+                    Message = Messages.User.NotFound
                 });
             }
 
@@ -379,14 +380,14 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return BadRequest(new ApiResponseDto<bool>
                 {
                     Success = false,
-                    Message = "Failed to update profile"
+                    Message = Messages.User.UpdateFailed
                 });
             }
 
             return Ok(new ApiResponseDto<bool>
             {
                 Success = true,
-                Message = "Profile updated successfully",
+                Message = Messages.User.ProfileUpdated,
                 Data = true
             });
         }
@@ -404,7 +405,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<UserDto>
                 {
                     Success = true,
-                    Message = "User updated successfully",
+                    Message = Messages.User.UpdateSuccess,
                     Data = user
                 });
             }
@@ -416,7 +417,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<UserDto>
                 {
                     Success = false,
-                    Message = "User not found"
+                    Message = Messages.User.NotFound
                 });
             }
 
@@ -428,7 +429,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<UserDto>
                 {
                     Success = true,
-                    Message = "User updated successfully",
+                    Message = Messages.User.UpdateSuccess,
                     Data = user
                 });
             }
@@ -441,7 +442,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<UserDto>
                 {
                     Success = true,
-                    Message = "User updated successfully",
+                    Message = Messages.User.UpdateSuccess,
                     Data = user
                 });
             }
@@ -474,7 +475,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<bool>
                 {
                     Success = false,
-                    Message = "User not found"
+                    Message = Messages.User.NotFound
                 });
             }
 

@@ -38,7 +38,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<PaymentDto>
                 {
                     Success = false,
-                    Message = "Payment not found"
+                    Message = Messages.Misc.PaymentNotFound
                 });
             }
 
@@ -60,7 +60,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<PaymentDto>
                 {
                     Success = true,
-                    Message = "Payment created successfully",
+                    Message = Messages.Misc.PaymentCreated,
                     Data = payment
                 });
             }
@@ -84,14 +84,14 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<PaymentDto>
                 {
                     Success = false,
-                    Message = "Payment not found"
+                    Message = Messages.Misc.PaymentNotFound
                 });
             }
 
             return Ok(new ApiResponseDto<PaymentDto>
             {
                 Success = true,
-                Message = "Payment processed successfully",
+                Message = Messages.Misc.PaymentProcessed,
                 Data = payment
             });
         }

@@ -1,6 +1,8 @@
 using Hotel_SAAS_Backend.API.Interfaces.Repositories;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using Hotel_SAAS_Backend.API.Models.Entities;
 using Hotel_SAAS_Backend.API.Models.Enums;
 
@@ -63,7 +65,7 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<SubscriptionPlanDto> UpdateAsync(Guid id, UpdateSubscriptionPlanDto dto)
         {
             var plan = await planRepository.GetByIdAsync(id) 
-                ?? throw new Exception("Subscription plan not found");
+                ?? throw new Exception(Messages.Subscription.PlanNotFound);
 
             if (dto.Name != null) plan.Name = dto.Name;
             if (dto.Description != null) plan.Description = dto.Description;
@@ -103,7 +105,7 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<bool> ToggleActiveAsync(Guid id)
         {
             var plan = await planRepository.GetByIdAsync(id) 
-                ?? throw new Exception("Subscription plan not found");
+                ?? throw new Exception(Messages.Subscription.PlanNotFound);
             
             plan.IsActive = !plan.IsActive;
             plan.UpdatedAt = DateTime.UtcNow;

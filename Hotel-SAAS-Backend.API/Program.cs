@@ -9,6 +9,7 @@ using Hotel_SAAS_Backend.API.Services;
 using Hotel_SAAS_Backend.API.Services.AI;
 using Hotel_SAAS_Backend.API.Services.Embedding;
 using Hotel_SAAS_Backend.API.Services.LLM;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +32,7 @@ builder.Services.AddControllers()
             return new BadRequestObjectResult(new
             {
                 Success = false,
-                Message = "Validation failed",
+                Message = Messages.Misc.ValidationFailed,
                 Errors = errors
             });
         };

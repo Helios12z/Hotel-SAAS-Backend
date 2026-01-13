@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using System.Security.Claims;
 
 namespace Hotel_SAAS_Backend.API.Controllers
@@ -52,7 +54,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<ReviewDto>
                 {
                     Success = true,
-                    Message = "Review submitted successfully. It will be visible after approval.",
+                    Message = Messages.Misc.ReviewSubmitted,
                     Data = review
                 });
             }
@@ -78,14 +80,14 @@ namespace Hotel_SAAS_Backend.API.Controllers
                     return NotFound(new ApiResponseDto<ReviewDto>
                     {
                         Success = false,
-                        Message = "Review not found"
+                        Message = Messages.Misc.ReviewNotFound
                     });
                 }
 
                 return Ok(new ApiResponseDto<ReviewDto>
                 {
                     Success = true,
-                    Message = "Review updated successfully",
+                    Message = Messages.Misc.ReviewUpdated,
                     Data = review
                 });
             }

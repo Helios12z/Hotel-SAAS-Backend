@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using Hotel_SAAS_Backend.API.Models.Enums;
 
 namespace Hotel_SAAS_Backend.API.Controllers
@@ -37,7 +38,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<AmenityDto>
                 {
                     Success = false,
-                    Message = "Amenity not found"
+                    Message = Messages.Hotel.AmenityNotFound
                 });
             }
 
@@ -69,7 +70,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return CreatedAtAction(nameof(GetAmenityById), new { id = amenity.Id }, new ApiResponseDto<AmenityDto>
                 {
                     Success = true,
-                    Message = "Amenity created successfully",
+                    Message = Messages.Hotel.AmenityCreated,
                     Data = amenity
                 });
             }
@@ -93,7 +94,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<AmenityDto>
                 {
                     Success = true,
-                    Message = "Amenity updated successfully",
+                    Message = Messages.Hotel.AmenityUpdated,
                     Data = amenity
                 });
             }
@@ -115,7 +116,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = result,
-                Message = result ? "Amenity deleted successfully" : "Failed to delete amenity",
+                Message = result ? Messages.Hotel.Deleted : Messages.Hotel.DeleteFailed,
                 Data = result
             });
         }

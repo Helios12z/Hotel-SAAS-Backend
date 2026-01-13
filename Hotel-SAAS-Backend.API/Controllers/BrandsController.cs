@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.Constants;
 
 namespace Hotel_SAAS_Backend.API.Controllers
 {
@@ -36,7 +37,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<BrandDto>
                 {
                     Success = false,
-                    Message = "Brand not found"
+                    Message = Messages.Subscription.BrandNotFound
                 });
             }
 
@@ -57,7 +58,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return CreatedAtAction(nameof(GetBrandById), new { id = brand.Id }, new ApiResponseDto<BrandDto>
                 {
                     Success = true,
-                    Message = "Brand created successfully",
+                    Message = Messages.Subscription.BrandCreated,
                     Data = brand
                 });
             }
@@ -81,7 +82,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<BrandDto>
                 {
                     Success = true,
-                    Message = "Brand updated successfully",
+                    Message = Messages.Subscription.BrandUpdated,
                     Data = brand
                 });
             }
@@ -103,7 +104,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = result,
-                Message = result ? "Brand deleted successfully" : "Failed to delete brand",
+                Message = result ? Messages.Subscription.Updated : Messages.Subscription.BrandUpdated,
                 Data = result
             });
         }

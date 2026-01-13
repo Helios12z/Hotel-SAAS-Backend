@@ -2,6 +2,7 @@ using Hotel_SAAS_Backend.API.Data;
 using Hotel_SAAS_Backend.API.Models.Entities;
 using Hotel_SAAS_Backend.API.Services.Embedding;
 using Hotel_SAAS_Backend.API.Utils;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hotel_SAAS_Backend.API.Services.AI
@@ -175,7 +176,7 @@ namespace Hotel_SAAS_Backend.API.Services.AI
         {
             if (vector1.Length != vector2.Length)
             {
-                throw new ArgumentException("Vectors must have the same dimension");
+                throw new ArgumentException(Messages.Misc.VectorDimensionMismatch);
             }
 
             double dotProduct = 0;

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using System.Security.Claims;
 
 namespace Hotel_SAAS_Backend.API.Controllers
@@ -27,7 +28,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<BookingDetailDto>
                 {
                     Success = false,
-                    Message = "Booking not found"
+                    Message = Messages.Booking.NotFound
                 });
             }
 
@@ -47,7 +48,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<BookingDto>
                 {
                     Success = false,
-                    Message = "Booking not found"
+                    Message = Messages.Booking.NotFound
                 });
             }
 
@@ -105,7 +106,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return CreatedAtAction(nameof(GetBookingById), new { id = booking.Id }, new ApiResponseDto<BookingDto>
                 {
                     Success = true,
-                    Message = "Booking created successfully",
+                    Message = Messages.Booking.Created,
                     Data = booking
                 });
             }
@@ -129,7 +130,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<BookingDto>
                 {
                     Success = true,
-                    Message = "Booking updated successfully",
+                    Message = Messages.Booking.Updated,
                     Data = booking
                 });
             }
@@ -151,7 +152,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = result,
-                Message = result ? "Booking cancelled successfully" : "Failed to cancel booking",
+                Message = result ? Messages.Booking.Cancelled : Messages.Booking.CancelFailed,
                 Data = result
             });
         }
@@ -164,7 +165,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = result,
-                Message = result ? "Booking confirmed successfully" : "Failed to confirm booking",
+                Message = result ? Messages.Booking.Confirmed : Messages.Booking.ConfirmFailed,
                 Data = result
             });
         }
@@ -177,7 +178,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = result,
-                Message = result ? "Check-in successful" : "Failed to check in",
+                Message = result ? Messages.Booking.CheckInSuccess : Messages.Booking.CheckInFailed,
                 Data = result
             });
         }
@@ -192,7 +193,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<CheckOutResponseDto>
                 {
                     Success = true,
-                    Message = "Check-out successful",
+                    Message = Messages.Booking.CheckOutSuccess,
                     Data = result
                 });
             }
@@ -218,7 +219,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<BookingDto>
                 {
                     Success = true,
-                    Message = "Room changed successfully",
+                    Message = Messages.Booking.RoomChanged,
                     Data = result
                 });
             }
@@ -267,7 +268,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<LateCheckoutResponseDto>
                 {
                     Success = true,
-                    Message = "Late checkout processed successfully",
+                    Message = Messages.Booking.LateCheckOutProcessed,
                     Data = result
                 });
             }
@@ -305,7 +306,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<AdditionalChargeDto>
                 {
                     Success = true,
-                    Message = "Additional charge added successfully",
+                    Message = Messages.Booking.AdditionalChargeAdded,
                     Data = result
                 });
             }
@@ -327,7 +328,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = result,
-                Message = result ? "Charge removed successfully" : "Failed to remove charge",
+                Message = result ? Messages.Booking.AdditionalChargeRemoved : Messages.Booking.AdditionalChargeRemoveFailed,
                 Data = result
             });
         }

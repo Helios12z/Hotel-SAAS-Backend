@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using System.Security.Claims;
 
 namespace Hotel_SAAS_Backend.API.Controllers
@@ -26,14 +27,14 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Unauthorized(new ApiResponseDto<AuthResponseDto>
                 {
                     Success = false,
-                    Message = "Invalid email or password"
+                    Message = Messages.Auth.InvalidCredentials
                 });
             }
 
             return Ok(new ApiResponseDto<AuthResponseDto>
             {
                 Success = true,
-                Message = "Login successful",
+                Message = Messages.Auth.LoginSuccess,
                 Data = result
             });
         }
@@ -47,14 +48,14 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return BadRequest(new ApiResponseDto<AuthResponseDto>
                 {
                     Success = false,
-                    Message = "Email already exists"
+                    Message = Messages.Auth.EmailExists
                 });
             }
 
             return Ok(new ApiResponseDto<AuthResponseDto>
             {
                 Success = true,
-                Message = "Registration successful",
+                Message = Messages.Auth.RegistrationSuccess,
                 Data = result
             });
         }
@@ -68,14 +69,14 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Unauthorized(new ApiResponseDto<AuthResponseDto>
                 {
                     Success = false,
-                    Message = "Invalid refresh token"
+                    Message = Messages.Auth.InvalidRefreshToken
                 });
             }
 
             return Ok(new ApiResponseDto<AuthResponseDto>
             {
                 Success = true,
-                Message = "Token refreshed successfully",
+                Message = Messages.Auth.RefreshTokenSuccess,
                 Data = result
             });
         }
@@ -90,7 +91,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = result,
-                Message = result ? "Logout successful" : "Logout failed",
+                Message = result ? Messages.Auth.LogoutSuccess : Messages.Auth.LogoutFailed,
                 Data = result
             });
         }
@@ -107,14 +108,14 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return BadRequest(new ApiResponseDto<bool>
                 {
                     Success = false,
-                    Message = "Failed to change password. Please check your current password."
+                    Message = Messages.Auth.PasswordChangeFailed
                 });
             }
 
             return Ok(new ApiResponseDto<bool>
             {
                 Success = true,
-                Message = "Password changed successfully",
+                Message = Messages.Auth.PasswordChangeSuccess,
                 Data = true
             });
         }
@@ -127,7 +128,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = true,
-                Message = "If an account exists with this email, a password reset link will be sent.",
+                Message = Messages.Auth.ForgotPasswordSuccess,
                 Data = result
             });
         }
@@ -142,14 +143,14 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return BadRequest(new ApiResponseDto<bool>
                 {
                     Success = false,
-                    Message = "Failed to reset password"
+                    Message = Messages.Auth.ResetPasswordFailed
                 });
             }
 
             return Ok(new ApiResponseDto<bool>
             {
                 Success = true,
-                Message = "Password reset successful",
+                Message = Messages.Auth.ResetPasswordSuccess,
                 Data = true
             });
         }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using Hotel_SAAS_Backend.API.Models.DTOs;
 using System.Security.Claims;
 
@@ -45,7 +46,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<SubscriptionDto>
                 {
                     Success = false,
-                    Message = "Subscription not found"
+                    Message = Messages.Subscription.NotFound
                 });
             }
 
@@ -68,7 +69,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<SubscriptionDto>
                 {
                     Success = false,
-                    Message = "No active subscription found for this brand"
+                    Message = Messages.Subscription.ActiveNotFound
                 });
             }
 
@@ -107,7 +108,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return CreatedAtAction(nameof(GetSubscriptionById), new { id = subscription.Id }, new ApiResponseDto<SubscriptionDto>
                 {
                     Success = true,
-                    Message = "Subscription created successfully",
+                    Message = Messages.Subscription.Created,
                     Data = subscription
                 });
             }
@@ -136,7 +137,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<SubscriptionDto>
                 {
                     Success = true,
-                    Message = "Subscription updated successfully",
+                    Message = Messages.Subscription.Updated,
                     Data = subscription
                 });
             }
@@ -165,7 +166,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<SubscriptionDto>
                 {
                     Success = true,
-                    Message = "Subscription plan changed successfully",
+                    Message = Messages.Subscription.PlanChanged,
                     Data = subscription
                 });
             }
@@ -194,7 +195,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<bool>
                 {
                     Success = result,
-                    Message = result ? "Subscription cancelled successfully" : "Failed to cancel subscription",
+                    Message = result ? Messages.Subscription.Cancelled : Messages.Subscription.CancelFailed,
                     Data = result
                 });
             }
@@ -221,7 +222,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<bool>
                 {
                     Success = result,
-                    Message = result ? "Subscription renewed successfully" : "Failed to renew subscription",
+                    Message = result ? Messages.Subscription.Renewed : Messages.Subscription.RenewFailed,
                     Data = result
                 });
             }
@@ -261,7 +262,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<SubscriptionInvoiceDto>
                 {
                     Success = false,
-                    Message = "Invoice not found"
+                    Message = Messages.Subscription.InvoiceNotFound
                 });
             }
 
@@ -287,7 +288,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<bool>
                 {
                     Success = result,
-                    Message = result ? "Invoice paid successfully" : "Failed to pay invoice",
+                    Message = result ? Messages.Subscription.InvoicePaid : Messages.Subscription.InvoicePayFailed,
                     Data = result
                 });
             }
@@ -311,7 +312,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = true,
-                Message = result ? "You can add more hotels" : "Hotel limit reached for your subscription",
+                Message = result ? Messages.Subscription.CanAddHotel : Messages.Subscription.PlanLimitReached,
                 Data = result
             });
         }
@@ -326,7 +327,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = true,
-                Message = result ? "You can add more rooms" : "Room limit reached for your subscription",
+                Message = result ? Messages.Subscription.CanAddRoom : Messages.Subscription.PlanLimitReached,
                 Data = result
             });
         }
@@ -341,7 +342,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = true,
-                Message = result ? "You can add more users" : "User limit reached for your subscription",
+                Message = result ? Messages.Subscription.CanAddUser : Messages.Subscription.PlanLimitReached,
                 Data = result
             });
         }

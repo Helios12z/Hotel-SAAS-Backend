@@ -100,7 +100,7 @@ namespace Hotel_SAAS_Backend.API.Services.AI
             var conversation = await _context.BotConversations
                 .Include(c => c.Messages.OrderBy(m => m.CreatedAt).Take(20)) // Last 20 messages for context
                 .FirstOrDefaultAsync(c => c.Id == conversationId)
-                ?? throw new Exception("Conversation not found");
+                ?? throw new Exception(Messages.Misc.ConversationNotFound);
 
             // Add user message
             var userMsg = new BotMessage

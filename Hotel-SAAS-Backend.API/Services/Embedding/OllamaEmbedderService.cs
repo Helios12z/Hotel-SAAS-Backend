@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Hotel_SAAS_Backend.API.Utils;
+using Hotel_SAAS_Backend.API.Models.Constants;
 
 namespace Hotel_SAAS_Backend.API.Services.Embedding
 {
@@ -70,7 +71,7 @@ namespace Hotel_SAAS_Backend.API.Services.Embedding
 
             var responseBody = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<OpenAiEmbeddingResponse>(responseBody, _jsonOptions)
-                ?? throw new Exception("Failed to deserialize embedding response");
+                ?? throw new Exception(Messages.Misc.InternalServerError);
 
             return result.Data.OrderBy(d => d.Index).Select(d => d.Embedding).ToList();
         }
@@ -98,7 +99,7 @@ namespace Hotel_SAAS_Backend.API.Services.Embedding
 
                 var responseBody = await response.Content.ReadAsStringAsync();
                 var result = JsonSerializer.Deserialize<OllamaEmbeddingResponse>(responseBody, _jsonOptions)
-                    ?? throw new Exception("Failed to deserialize Ollama embedding response");
+                    ?? throw new Exception(Messages.Misc.InternalServerError);
 
                 embeddings.Add(result.Embedding);
             }

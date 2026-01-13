@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using System.Security.Claims;
 
 namespace Hotel_SAAS_Backend.API.Controllers
@@ -55,7 +56,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<WishlistDto>
                 {
                     Success = true,
-                    Message = "Added to wishlist",
+                    Message = Messages.Misc.AddedToWishlist,
                     Data = result
                 });
             }
@@ -95,7 +96,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<bool>
                 {
                     Success = false,
-                    Message = "Hotel not found"
+                    Message = Messages.Hotel.NotFound
                 });
             }
         }
@@ -111,14 +112,14 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<WishlistDto>
                 {
                     Success = false,
-                    Message = "Item not found in wishlist"
+                    Message = Messages.Misc.ItemNotFoundInWishlist
                 });
             }
 
             return Ok(new ApiResponseDto<WishlistDto>
             {
                 Success = true,
-                Message = "Note updated",
+                Message = Messages.Misc.WishlistNoteUpdated,
                 Data = result
             });
         }

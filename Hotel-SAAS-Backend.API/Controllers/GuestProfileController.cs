@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using System.Security.Claims;
 
 namespace Hotel_SAAS_Backend.API.Controllers
@@ -33,7 +34,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<GuestProfileDto>
                 {
                     Success = false,
-                    Message = "Profile not found"
+                    Message = Messages.User.ProfileNotFound
                 });
             }
 
@@ -54,14 +55,14 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<GuestProfileDto>
                 {
                     Success = false,
-                    Message = "Profile not found"
+                    Message = Messages.User.ProfileNotFound
                 });
             }
 
             return Ok(new ApiResponseDto<GuestProfileDto>
             {
                 Success = true,
-                Message = "Preferences updated",
+                Message = Messages.User.PreferencesUpdated,
                 Data = result
             });
         }
@@ -97,7 +98,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = true,
-                Message = "History cleared",
+                Message = Messages.User.HistoryCleared,
                 Data = true
             });
         }

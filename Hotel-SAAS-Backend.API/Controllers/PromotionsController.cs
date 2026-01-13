@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using Hotel_SAAS_Backend.API.Models.DTOs;
 using System.Security.Claims;
 
@@ -37,7 +38,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<PromotionDto>
                 {
                     Success = false,
-                    Message = "Promotion not found"
+                    Message = Messages.Misc.PromotionNotFound
                 });
             }
 
@@ -57,7 +58,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<PromotionDto>
                 {
                     Success = false,
-                    Message = "Promotion not found"
+                    Message = Messages.Misc.PromotionNotFound
                 });
             }
 
@@ -102,7 +103,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                     new ApiResponseDto<PromotionDto>
                     {
                         Success = true,
-                        Message = "Promotion created successfully",
+                        Message = Messages.Misc.PromotionCreated,
                         Data = promotion
                     });
             }
@@ -126,7 +127,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<PromotionDto>
                 {
                     Success = true,
-                    Message = "Promotion updated successfully",
+                    Message = Messages.Misc.PromotionUpdated,
                     Data = promotion
                 });
             }
@@ -135,7 +136,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<PromotionDto>
                 {
                     Success = false,
-                    Message = "Promotion not found"
+                    Message = Messages.Misc.PromotionNotFound
                 });
             }
         }
@@ -174,7 +175,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = true,
-                Message = "Promotion deleted",
+                Message = Messages.Misc.PromotionDeleted,
                 Data = true
             });
         }

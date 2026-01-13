@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Stripe;
 using Stripe.Checkout;
 using LocalEnums = Hotel_SAAS_Backend.API.Models.Enums;
+using Hotel_SAAS_Backend.API.Models.Constants;
 
 namespace Hotel_SAAS_Backend.API.Services
 {
@@ -44,7 +45,7 @@ namespace Hotel_SAAS_Backend.API.Services
         {
             var booking = await _bookingRepository.GetByIdWithDetailsAsync(bookingId);
             if (booking == null)
-                throw new ArgumentException("Booking not found", nameof(bookingId));
+                throw new ArgumentException(Messages.Subscription.BookingNotFound, nameof(bookingId));
 
             var baseUrl = _options.FrontendBaseUrl;
             successUrl ??= $"{baseUrl}/bookings/{bookingId}/success?session_id={{CHECKOUT_SESSION_ID}}";
@@ -111,7 +112,7 @@ namespace Hotel_SAAS_Backend.API.Services
         {
             var subscription = await _subscriptionRepository.GetByIdWithDetailsAsync(subscriptionId);
             if (subscription == null)
-                throw new ArgumentException("Subscription not found", nameof(subscriptionId));
+                throw new ArgumentException(Messages.Subscription.NotFound, nameof(subscriptionId));
 
             var baseUrl = _options.FrontendBaseUrl;
             successUrl ??= $"{baseUrl}/subscriptions/{subscriptionId}/success?session_id={{CHECKOUT_SESSION_ID}}";

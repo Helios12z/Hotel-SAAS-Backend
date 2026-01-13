@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Models.DTOs;
 using Hotel_SAAS_Backend.API.Models.Enums;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using System.Security.Claims;
 
 namespace Hotel_SAAS_Backend.API.Controllers
@@ -35,7 +36,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return CreatedAtAction(nameof(GetApplicationById), new { id = application.Id }, new ApiResponseDto<HotelOnboardingDto>
                 {
                     Success = true,
-                    Message = "Application created successfully. Please complete all required fields and upload documents.",
+                    Message = Messages.Onboarding.Created,
                     Data = application
                 });
             }
@@ -78,7 +79,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<HotelOnboardingDto>
                 {
                     Success = false,
-                    Message = "Application not found"
+                    Message = Messages.Onboarding.NotFound
                 });
             }
 
@@ -105,7 +106,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<HotelOnboardingDto>
                 {
                     Success = true,
-                    Message = "Application updated successfully",
+                    Message = Messages.Onboarding.Updated,
                     Data = application
                 });
             }
@@ -163,7 +164,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<HotelOnboardingDto>
                 {
                     Success = true,
-                    Message = "Application submitted successfully. Our team will review it shortly.",
+                    Message = Messages.Onboarding.Submitted,
                     Data = application
                 });
             }
@@ -193,7 +194,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<OnboardingDocumentDto>
                 {
                     Success = true,
-                    Message = "Document uploaded successfully",
+                    Message = Messages.Onboarding.DocumentUploaded,
                     Data = document
                 });
             }
@@ -352,7 +353,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<HotelOnboardingDto>
                 {
                     Success = true,
-                    Message = "Application approved! Brand, Hotel, and Subscription have been created.",
+                    Message = Messages.Onboarding.Approved,
                     Data = application
                 });
             }

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using System.Security.Claims;
 
 namespace Hotel_SAAS_Backend.API.Controllers
@@ -54,7 +55,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = true,
-                Message = "Marked as read",
+                Message = Messages.Misc.MarkedAsRead,
                 Data = true
             });
         }
@@ -66,7 +67,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = true,
-                Message = "All notifications marked as read",
+                Message = Messages.Misc.MarkedAsRead,
                 Data = true
             });
         }
@@ -79,7 +80,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = true,
-                Message = "Notifications marked as read",
+                Message = Messages.Misc.MarkedAsRead,
                 Data = true
             });
         }

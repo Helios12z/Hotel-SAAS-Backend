@@ -3,6 +3,7 @@ using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Mapping;
 using Hotel_SAAS_Backend.API.Models.DTOs;
 using Hotel_SAAS_Backend.API.Models.Entities;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using Hotel_SAAS_Backend.API.Models.Enums;
 
 namespace Hotel_SAAS_Backend.API.Services
@@ -42,7 +43,7 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<UserDto> UpdateUserAsync(Guid id, UpdateUserDto updateUserDto)
         {
             var user = await userRepository.GetByIdAsync(id);
-            if (user == null) throw new Exception("User not found");
+            if (user == null) throw new Exception(Messages.User.NotFound);
 
             if (updateUserDto.FirstName != null) user.FirstName = updateUserDto.FirstName;
             if (updateUserDto.LastName != null) user.LastName = updateUserDto.LastName;

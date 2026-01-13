@@ -3,6 +3,7 @@ using Hotel_SAAS_Backend.API.Interfaces.Repositories;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Mapping;
 using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using Hotel_SAAS_Backend.API.Models.Entities;
 using Hotel_SAAS_Backend.API.Models.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -142,7 +143,7 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<BookingDto> UpdateBookingAsync(Guid id, UpdateBookingDto updateBookingDto)
         {
             var booking = await bookingRepository.GetByIdAsync(id);
-            if (booking == null) throw new Exception("Booking not found");
+            if (booking == null) throw new Exception(Messages.Booking.NotFound);
 
             if (updateBookingDto.CheckInDate.HasValue) booking.CheckInDate = updateBookingDto.CheckInDate.Value;
             if (updateBookingDto.CheckOutDate.HasValue) booking.CheckOutDate = updateBookingDto.CheckOutDate.Value;
@@ -204,7 +205,7 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<CheckOutResponseDto> CheckOutAsync(Guid id, CheckOutRequestDto? request = null)
         {
             var booking = await bookingRepository.GetByIdWithDetailsAsync(id);
-            if (booking == null) throw new Exception("Booking not found");
+            if (booking == null) throw new Exception(Messages.Booking.NotFound);
 
             // Add additional charges from request
             var additionalChargesTotal = 0m;
@@ -299,23 +300,23 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<BookingDto> ChangeRoomAsync(Guid bookingId, ChangeRoomRequestDto request)
         {
             var booking = await bookingRepository.GetByIdWithDetailsAsync(bookingId);
-            if (booking == null) throw new Exception("Booking not found");
+            if (booking == null) throw new Exception(Messages.Booking.NotFound);
 
             if (booking.Status != BookingStatus.CheckedIn)
-                throw new Exception("Can only change room for checked-in bookings");
+                throw new Exception(Messages.Booking.CannotChangeRoomStatus);
 
             var oldRoom = await roomRepository.GetByIdAsync(request.OldRoomId);
-            if (oldRoom == null) throw new Exception("Old room not found");
+            if (oldRoom == null) throw new Exception(Messages.Booking.OldRoomNotFound);
 
             var newRoom = await roomRepository.GetByIdAsync(request.NewRoomId);
-            if (newRoom == null) throw new Exception("New room not found");
+            if (newRoom == null) throw new Exception(Messages.Booking.NewRoomNotFound);
 
             if (newRoom.Status != RoomStatus.Available)
-                throw new Exception("New room is not available");
+                throw new Exception(Messages.Booking.NewRoomNotAvailable);
 
             // Update booking room
             var bookingRoom = booking.BookingRooms.FirstOrDefault(br => br.RoomId == request.OldRoomId);
-            if (bookingRoom == null) throw new Exception("Booking room not found");
+            if (bookingRoom == null) throw new Exception(Messages.Booking.BookingRoomNotFound);
 
             // Calculate price difference (simplified - using new room's base price)
             var numberOfNights = (int)(booking.CheckOutDate - booking.CheckInDate).TotalDays;
@@ -344,16 +345,16 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<LateCheckoutResponseDto> CalculateLateCheckoutFeeAsync(Guid bookingId, LateCheckoutRequestDto request)
         {
             var booking = await bookingRepository.GetByIdWithDetailsAsync(bookingId);
-            if (booking == null) throw new Exception("Booking not found");
+            if (booking == null) throw new Exception(Messages.Booking.NotFound);
 
             if (booking.Status != BookingStatus.CheckedIn)
-                throw new Exception("Can only calculate late checkout for checked-in bookings");
+                throw new Exception(Messages.Booking.CannotCalculateLateCheckOut);
 
             var originalCheckOut = booking.CheckOutDate;
             var newCheckOut = request.NewCheckOutTime;
 
             if (newCheckOut <= originalCheckOut)
-                throw new Exception("New check-out time must be after original check-out time");
+                throw new Exception(Messages.Booking.NewCheckOutTimeInvalid);
 
             // Calculate extra hours (minimum 1 hour, maximum 24 hours)
             var extraHours = (int)Math.Ceiling((newCheckOut - originalCheckOut).TotalHours);
@@ -361,7 +362,7 @@ namespace Hotel_SAAS_Backend.API.Services
 
             // Calculate late fee (10% of daily rate per hour, max 50% of daily rate)
             var mainRoom = booking.BookingRooms.FirstOrDefault();
-            if (mainRoom == null) throw new Exception("No rooms in booking");
+            if (mainRoom == null) throw new Exception(Messages.Booking.NoRoomsInBooking);
 
             var dailyRate = mainRoom.Price / (int)(booking.CheckOutDate - booking.CheckInDate).TotalDays;
             dailyRate = Math.Max(dailyRate, mainRoom.Room != null ? mainRoom.Room.BasePrice : dailyRate);
@@ -388,7 +389,7 @@ namespace Hotel_SAAS_Backend.API.Services
             var feeCalculation = await CalculateLateCheckoutFeeAsync(bookingId, request);
 
             var booking = await bookingRepository.GetByIdWithDetailsAsync(bookingId);
-            if (booking == null) throw new Exception("Booking not found");
+            if (booking == null) throw new Exception(Messages.Booking.NotFound);
 
             // Add late fee as additional charge
             var lateFeeCharge = new AdditionalCharge

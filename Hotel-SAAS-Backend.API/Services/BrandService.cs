@@ -2,6 +2,7 @@ using Hotel_SAAS_Backend.API.Interfaces.Repositories;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Mapping;
 using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using Hotel_SAAS_Backend.API.Models.Entities;
 
 namespace Hotel_SAAS_Backend.API.Services
@@ -30,7 +31,7 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<BrandDto> UpdateBrandAsync(Guid id, UpdateBrandDto updateBrandDto)
         {
             var brand = await brandRepository.GetByIdAsync(id);
-            if (brand == null) throw new Exception("Brand not found");
+            if (brand == null) throw new Exception(Messages.Subscription.BrandNotFound);
 
             Mapper.UpdateEntity(updateBrandDto, brand);
             var updatedBrand = await brandRepository.UpdateAsync(brand);

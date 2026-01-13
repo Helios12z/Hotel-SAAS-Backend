@@ -2,6 +2,7 @@ using Hotel_SAAS_Backend.API.Interfaces.Repositories;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Mapping;
 using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using Hotel_SAAS_Backend.API.Models.Entities;
 using Hotel_SAAS_Backend.API.Models.Enums;
 
@@ -52,7 +53,7 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<RoomDto> UpdateRoomAsync(Guid id, UpdateRoomDto updateRoomDto)
         {
             var room = await roomRepository.GetByIdAsync(id);
-            if (room == null) throw new Exception("Room not found");
+            if (room == null) throw new Exception(Messages.Room.NotFound);
 
             Mapper.UpdateEntity(updateRoomDto, room);
             var updatedRoom = await roomRepository.UpdateAsync(room);
@@ -163,7 +164,7 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<RoomDto> MarkRoomAvailableAsync(Guid roomId)
         {
             var room = await roomRepository.GetByIdAsync(roomId);
-            if (room == null) throw new Exception("Room not found");
+            if (room == null) throw new Exception(Messages.Room.NotFound);
 
             room.Status = RoomStatus.Available;
             var updatedRoom = await roomRepository.UpdateAsync(room);

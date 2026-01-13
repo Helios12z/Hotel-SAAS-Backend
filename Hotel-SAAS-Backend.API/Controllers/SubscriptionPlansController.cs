@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using Hotel_SAAS_Backend.API.Models.DTOs;
 
 namespace Hotel_SAAS_Backend.API.Controllers
@@ -42,7 +43,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return NotFound(new ApiResponseDto<SubscriptionPlanDto>
                 {
                     Success = false,
-                    Message = "Subscription plan not found"
+                    Message = Messages.Subscription.PlanNotFound
                 });
             }
 
@@ -82,7 +83,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return CreatedAtAction(nameof(GetPlanById), new { id = plan.Id }, new ApiResponseDto<SubscriptionPlanDto>
                 {
                     Success = true,
-                    Message = "Subscription plan created successfully",
+                    Message = Messages.Subscription.Created,
                     Data = plan
                 });
             }
@@ -111,7 +112,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<SubscriptionPlanDto>
                 {
                     Success = true,
-                    Message = "Subscription plan updated successfully",
+                    Message = Messages.Subscription.Updated,
                     Data = plan
                 });
             }
@@ -138,7 +139,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 return Ok(new ApiResponseDto<bool>
                 {
                     Success = true,
-                    Message = isActive ? "Plan activated" : "Plan deactivated",
+                    Message = isActive ? Messages.Platform.PlanActivated : Messages.Platform.PlanDeactivated,
                     Data = isActive
                 });
             }
@@ -163,7 +164,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = result,
-                Message = result ? "Subscription plan deleted successfully" : "Failed to delete subscription plan",
+                Message = result ? Messages.Platform.PlanDeleted : Messages.Platform.PlanDeleteFailed,
                 Data = result
             });
         }

@@ -1,6 +1,8 @@
 using Hotel_SAAS_Backend.API.Interfaces.Repositories;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.Constants;
 using Hotel_SAAS_Backend.API.Models.Entities;
 using Hotel_SAAS_Backend.API.Models.Enums;
 
@@ -75,13 +77,13 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<HotelOnboardingDto> UpdateAsync(Guid id, Guid applicantId, UpdateOnboardingDto dto)
         {
             var onboarding = await onboardingRepository.GetByIdAsync(id) 
-                ?? throw new Exception("Onboarding application not found");
+                ?? throw new Exception(Messages.Onboarding.NotFound);
 
             if (onboarding.ApplicantId != applicantId)
-                throw new Exception("You don't have permission to update this application");
+                throw new Exception(Messages.Onboarding.NoPermissionUpdate);
 
             if (onboarding.Status != OnboardingStatus.Draft && onboarding.Status != OnboardingStatus.DocumentsRequired)
-                throw new Exception("Application cannot be updated in current status");
+                throw new Exception(Messages.Onboarding.CannotUpdateStatus);
 
             // Update fields
             if (dto.BrandName != null) onboarding.BrandName = dto.BrandName;
@@ -124,13 +126,13 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<bool> DeleteAsync(Guid id, Guid applicantId)
         {
             var onboarding = await onboardingRepository.GetByIdAsync(id) 
-                ?? throw new Exception("Onboarding application not found");
+                ?? throw new Exception(Messages.Onboarding.NotFound);
 
             if (onboarding.ApplicantId != applicantId)
-                throw new Exception("You don't have permission to delete this application");
+                throw new Exception(Messages.Onboarding.NoPermissionDelete);
 
             if (onboarding.Status != OnboardingStatus.Draft)
-                throw new Exception("Only draft applications can be deleted");
+                throw new Exception(Messages.Onboarding.OnlyDraftDelete);
 
             await onboardingRepository.DeleteAsync(id);
             return true;
@@ -139,16 +141,16 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<HotelOnboardingDto> SubmitAsync(Guid id, Guid applicantId, SubmitOnboardingDto dto)
         {
             var onboarding = await onboardingRepository.GetByIdAsync(id) 
-                ?? throw new Exception("Onboarding application not found");
+                ?? throw new Exception(Messages.Onboarding.NotFound);
 
             if (onboarding.ApplicantId != applicantId)
-                throw new Exception("You don't have permission to submit this application");
+                throw new Exception(Messages.Onboarding.NoPermissionSubmit);
 
             if (onboarding.Status != OnboardingStatus.Draft && onboarding.Status != OnboardingStatus.DocumentsRequired)
-                throw new Exception("Application cannot be submitted in current status");
+                throw new Exception(Messages.Onboarding.CannotSubmitStatus);
 
             if (!dto.AcceptedTerms)
-                throw new Exception("You must accept the terms and conditions");
+                throw new Exception(Messages.Onboarding.TermsRequired);
 
             onboarding.AcceptedTerms = true;
             onboarding.AcceptedTermsAt = DateTime.UtcNow;
@@ -160,8 +162,8 @@ namespace Hotel_SAAS_Backend.API.Services
 
             // Notify admins about new application
             await notificationService.NotifyAdminsAsync(
-                "New Hotel Partner Application",
-                $"A new hotel partner application has been submitted for {onboarding.HotelName}",
+                Messages.Onboarding.SubmittedNotificationTitle,
+                string.Format(Messages.Onboarding.SubmittedNotificationMessage, onboarding.HotelName),
                 NotificationType.SystemAlert,
                 $"/admin/onboarding/{id}");
 
@@ -172,10 +174,10 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<OnboardingDocumentDto> UploadDocumentAsync(Guid onboardingId, Guid applicantId, UploadDocumentDto dto)
         {
             var onboarding = await onboardingRepository.GetByIdAsync(onboardingId) 
-                ?? throw new Exception("Onboarding application not found");
+                ?? throw new Exception(Messages.Onboarding.NotFound);
 
             if (onboarding.ApplicantId != applicantId)
-                throw new Exception("You don't have permission to upload documents to this application");
+                throw new Exception(Messages.Onboarding.NoPermissionDocUpload);
 
             var document = new OnboardingDocument
             {
@@ -196,14 +198,14 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<bool> DeleteDocumentAsync(Guid documentId, Guid applicantId)
         {
             var document = await documentRepository.GetByIdAsync(documentId) 
-                ?? throw new Exception("Document not found");
+                ?? throw new Exception(Messages.Onboarding.DocumentNotFound);
 
             var onboarding = await onboardingRepository.GetByIdAsync(document.OnboardingId);
             if (onboarding == null || onboarding.ApplicantId != applicantId)
-                throw new Exception("You don't have permission to delete this document");
+                throw new Exception(Messages.Onboarding.NoPermissionDocDelete);
 
             if (document.Status == DocumentStatus.Approved)
-                throw new Exception("Approved documents cannot be deleted");
+                throw new Exception(Messages.Onboarding.ApprovedDocDeleteFailed);
 
             await documentRepository.DeleteAsync(documentId);
             return true;
@@ -247,7 +249,7 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<HotelOnboardingDto> ReviewAsync(Guid id, Guid reviewerId, ReviewOnboardingDto dto)
         {
             var onboarding = await onboardingRepository.GetByIdAsync(id) 
-                ?? throw new Exception("Onboarding application not found");
+                ?? throw new Exception(Messages.Onboarding.NotFound);
 
             onboarding.Status = dto.NewStatus;
             onboarding.ReviewedById = reviewerId;
@@ -267,16 +269,16 @@ namespace Hotel_SAAS_Backend.API.Services
                 : NotificationType.BookingConfirmation;
             var message = dto.NewStatus switch
             {
-                OnboardingStatus.UnderReview => "Your application is now under review.",
-                OnboardingStatus.DocumentsRequired => "Additional documents are required for your application.",
-                OnboardingStatus.Rejected => $"Your application has been rejected. Reason: {dto.RejectionReason}",
-                _ => "Your application status has been updated."
+                OnboardingStatus.UnderReview => Messages.Onboarding.StatusReview,
+                OnboardingStatus.DocumentsRequired => Messages.Onboarding.StatusDocRequired,
+                OnboardingStatus.Rejected => string.Format(Messages.Onboarding.StatusRejected, dto.RejectionReason),
+                _ => Messages.Onboarding.StatusUpdated
             };
 
             await notificationService.CreateAsync(new CreateNotificationDto
             {
                 UserId = onboarding.ApplicantId,
-                Title = "Application Status Update",
+                Title = Messages.Onboarding.StatusUpdated,
                 Message = message,
                 Type = notificationType
             });
@@ -287,17 +289,17 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<HotelOnboardingDto> ApproveAsync(Guid id, Guid approverId)
         {
             var onboarding = await onboardingRepository.GetByIdWithDetailsAsync(id) 
-                ?? throw new Exception("Onboarding application not found");
+                ?? throw new Exception(Messages.Onboarding.NotFound);
 
             if (onboarding.Status != OnboardingStatus.UnderReview)
-                throw new Exception("Only applications under review can be approved");
+                throw new Exception(Messages.Onboarding.OnlyReviewApprove);
 
             // Create Brand (or use existing)
             Brand brand;
             if (onboarding.ExistingBrandId.HasValue)
             {
                 brand = await brandRepository.GetByIdAsync(onboarding.ExistingBrandId.Value) 
-                    ?? throw new Exception("Existing brand not found");
+                    ?? throw new Exception(Messages.Subscription.ExistingBrandNotFound);
             }
             else
             {
@@ -398,8 +400,8 @@ namespace Hotel_SAAS_Backend.API.Services
             await notificationService.CreateAsync(new CreateNotificationDto
             {
                 UserId = onboarding.ApplicantId,
-                Title = "?? Congratulations! Your Application is Approved",
-                Message = $"Your hotel {onboarding.HotelName} has been approved and is now live on our platform!",
+                Title = Messages.Onboarding.ApprovedTitle,
+                Message = string.Format(Messages.Onboarding.ApprovedMessage, onboarding.HotelName),
                 Type = NotificationType.SystemAlert
             });
 
@@ -409,7 +411,7 @@ namespace Hotel_SAAS_Backend.API.Services
         public async Task<OnboardingDocumentDto> ReviewDocumentAsync(Guid documentId, Guid reviewerId, ReviewDocumentDto dto)
         {
             var document = await documentRepository.GetByIdAsync(documentId) 
-                ?? throw new Exception("Document not found");
+                ?? throw new Exception(Messages.Onboarding.DocumentNotFound);
 
             document.Status = dto.Status;
             document.ReviewedById = reviewerId;

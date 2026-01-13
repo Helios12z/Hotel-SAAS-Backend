@@ -2,6 +2,7 @@ using Hotel_SAAS_Backend.API.Interfaces.Repositories;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Mapping;
 using Hotel_SAAS_Backend.API.Models.DTOs;
+using Hotel_SAAS_Backend.API.Models.Constants;
 
 namespace Hotel_SAAS_Backend.API.Services
 {
@@ -32,11 +33,11 @@ namespace Hotel_SAAS_Backend.API.Services
             // Check if hotel exists
             var hotel = await hotelRepository.GetByIdAsync(dto.HotelId);
             if (hotel == null)
-                throw new KeyNotFoundException("Hotel not found");
+                throw new KeyNotFoundException(Messages.Hotel.NotFound);
 
             // Check if already in wishlist
             if (await wishlistRepository.ExistsAsync(userId, dto.HotelId))
-                throw new InvalidOperationException("Hotel already in wishlist");
+                throw new InvalidOperationException(Messages.Misc.HotelAlreadyInWishlist);
 
             var wishlist = Mapper.ToEntity(dto, userId);
             var created = await wishlistRepository.CreateAsync(wishlist);
