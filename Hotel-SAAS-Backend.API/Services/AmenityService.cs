@@ -28,6 +28,18 @@ namespace Hotel_SAAS_Backend.API.Services
             return amenities.Select(Mapper.ToDto);
         }
 
+        public async Task<IEnumerable<AmenityDto>> GetActiveAmenitiesAsync()
+        {
+            var amenities = await amenityRepository.GetActiveAsync();
+            return amenities.Select(Mapper.ToDto);
+        }
+
+        public async Task<IEnumerable<AmenityDto>> GetActiveAmenitiesByTypeAsync(AmenityType type)
+        {
+            var amenities = await amenityRepository.GetActiveByTypeAsync(type);
+            return amenities.Select(Mapper.ToDto);
+        }
+
         public async Task<AmenityDto> CreateAmenityAsync(CreateAmenityDto createAmenityDto)
         {
             var amenity = Mapper.ToEntity(createAmenityDto);

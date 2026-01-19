@@ -61,7 +61,8 @@ namespace Hotel_SAAS_Backend.API.Models.Entities
         public int? NumberOfFloors { get; set; }
         public DateTime? YearBuilt { get; set; }
         public DateTime? YearRenovated { get; set; }
-        public decimal? CommissionRate { get; set; } // Platform commission (deprecated, use SubscriptionPlan)
+        [Obsolete("Use Brand's SubscriptionPlan.CommissionRate instead")]
+        public decimal? CommissionRate { get; set; } // Deprecated: Use Brand's SubscriptionPlan.CommissionRate
         public float? AverageRating { get; set; }
         public int ReviewCount { get; set; } = 0;
 

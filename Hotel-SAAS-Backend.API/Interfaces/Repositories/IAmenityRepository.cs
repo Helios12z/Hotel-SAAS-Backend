@@ -8,6 +8,8 @@ namespace Hotel_SAAS_Backend.API.Interfaces.Repositories
         Task<Amenity?> GetByIdAsync(Guid id);
         Task<IEnumerable<Amenity>> GetAllAsync();
         Task<IEnumerable<Amenity>> GetByTypeAsync(AmenityType type);
+        Task<IEnumerable<Amenity>> GetActiveAsync();
+        Task<IEnumerable<Amenity>> GetActiveByTypeAsync(AmenityType type);
         Task<Amenity> CreateAsync(Amenity amenity);
         Task<Amenity> UpdateAsync(Amenity amenity);
         Task DeleteAsync(Guid id);

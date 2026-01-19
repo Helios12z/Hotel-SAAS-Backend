@@ -15,7 +15,6 @@ namespace Hotel_SAAS_Backend.API.Models.DTOs
         public string? PostalCode { get; set; }
         public string? TaxId { get; set; }
         public string? BusinessLicense { get; set; }
-        public string? CommissionRate { get; set; }
     }
 
     public class UpdateBrandDto
@@ -31,7 +30,6 @@ namespace Hotel_SAAS_Backend.API.Models.DTOs
         public string? Country { get; set; }
         public string? PostalCode { get; set; }
         public bool? IsActive { get; set; }
-        public string? CommissionRate { get; set; }
     }
 
     // Response DTOs
@@ -48,7 +46,7 @@ namespace Hotel_SAAS_Backend.API.Models.DTOs
         public string? Country { get; set; }
         public bool IsActive { get; set; }
         public int HotelCount { get; set; }
-        public string? CommissionRate { get; set; }
+        public decimal? CommissionRate { get; set; }
         public string? SubscriptionPlan { get; set; }
         public string? SubscriptionStatus { get; set; }
     }

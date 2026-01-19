@@ -135,7 +135,7 @@ namespace Hotel_SAAS_Backend.API.Services
         {
             var hotelAmenities = await context.HotelAmenities
                 .Include(ha => ha.Amenity)
-                .Where(ha => ha.HotelId == hotelId && ha.Amenity!.IsActive)
+                .Where(ha => ha.HotelId == hotelId && ha.Amenity!.IsActive && !ha.Amenity.IsDeleted)
                 .ToListAsync();
 
             return hotelAmenities.Select(ha => new AmenityDto

@@ -52,6 +52,7 @@ namespace Hotel_SAAS_Backend.API.Data
                 LastName = "Marriott",
                 Role = UserRole.BrandAdmin,
                 Status = UserStatus.Active,
+                BrandId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -66,6 +67,7 @@ namespace Hotel_SAAS_Backend.API.Data
                 LastName = "Hilton",
                 Role = UserRole.BrandAdmin,
                 Status = UserStatus.Active,
+                BrandId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -81,6 +83,7 @@ namespace Hotel_SAAS_Backend.API.Data
                 LastName = "Johnson",
                 Role = UserRole.HotelManager,
                 Status = UserStatus.Active,
+                BrandId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), // Marriott brand for this manager
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -160,7 +163,6 @@ namespace Hotel_SAAS_Backend.API.Data
                 City = "Bethesda",
                 Country = "United States",
                 IsActive = true,
-                CommissionRate = "8",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -179,7 +181,6 @@ namespace Hotel_SAAS_Backend.API.Data
                 City = "McLean",
                 Country = "United States",
                 IsActive = true,
-                CommissionRate = "12",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -305,7 +306,6 @@ namespace Hotel_SAAS_Backend.API.Data
                 PetPolicy = "Pets allowed with $150 non-refundable fee",
                 TotalRooms = 1950,
                 NumberOfFloors = 49,
-                CommissionRate = 15,
                 AverageRating = 4.5f,
                 ReviewCount = 2847,
                 YearBuilt = DateTime.SpecifyKind(new DateTime(1985, 1, 1), DateTimeKind.Utc),
@@ -345,7 +345,6 @@ namespace Hotel_SAAS_Backend.API.Data
                 PetPolicy = "Pets not allowed",
                 TotalRooms = 289,
                 NumberOfFloors = 7,
-                CommissionRate = 15,
                 AverageRating = 4.2f,
                 ReviewCount = 1243,
                 YearBuilt = DateTime.SpecifyKind(new DateTime(1990, 1, 1), DateTimeKind.Utc),
@@ -383,7 +382,6 @@ namespace Hotel_SAAS_Backend.API.Data
                 PetPolicy = "Small pets allowed with €50 fee",
                 TotalRooms = 260,
                 NumberOfFloors = 8,
-                CommissionRate = 15,
                 AverageRating = 4.3f,
                 ReviewCount = 1876,
                 YearBuilt = DateTime.SpecifyKind(new DateTime(1975, 1, 1), DateTimeKind.Utc),
@@ -421,7 +419,6 @@ namespace Hotel_SAAS_Backend.API.Data
                 PetPolicy = "Pets allowed",
                 TotalRooms = 447,
                 NumberOfFloors = 8,
-                CommissionRate = 12,
                 AverageRating = 4.7f,
                 ReviewCount = 3210,
                 YearBuilt = DateTime.SpecifyKind(new DateTime(1960, 1, 1), DateTimeKind.Utc),
@@ -456,7 +453,6 @@ namespace Hotel_SAAS_Backend.API.Data
                 CheckOutTime = "11:00",
                 TotalRooms = 350,
                 NumberOfFloors = 25,
-                CommissionRate = 15,
                 AverageRating = 4.6f,
                 ReviewCount = 1500,
                 CreatedAt = DateTime.UtcNow,

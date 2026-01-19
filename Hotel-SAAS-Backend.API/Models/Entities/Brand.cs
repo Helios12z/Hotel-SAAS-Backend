@@ -17,7 +17,8 @@ namespace Hotel_SAAS_Backend.API.Models.Entities
         public bool IsActive { get; set; } = true;
         public string? TaxId { get; set; }
         public string? BusinessLicense { get; set; }
-        public string? CommissionRate { get; set; } = "15"; // Percentage
+        [Obsolete("Use SubscriptionPlan.CommissionRate instead")]
+        public string? CommissionRate { get; set; } = "15"; // Deprecated: Use SubscriptionPlan.CommissionRate
         public string? PaymentTerms { get; set; }
         public string? ContractStart { get; set; }
         public string? ContractEnd { get; set; }

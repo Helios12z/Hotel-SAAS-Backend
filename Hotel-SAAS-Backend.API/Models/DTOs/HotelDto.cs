@@ -55,7 +55,6 @@ namespace Hotel_SAAS_Backend.API.Models.DTOs
         // Hotel Info
         public int? TotalRooms { get; set; }
         public int? NumberOfFloors { get; set; }
-        public decimal? CommissionRate { get; set; }
     }
 
     public class UpdateHotelDto
@@ -112,7 +111,6 @@ namespace Hotel_SAAS_Backend.API.Models.DTOs
         // Hotel Info
         public int? TotalRooms { get; set; }
         public int? NumberOfFloors { get; set; }
-        public decimal? CommissionRate { get; set; }
     }
 
     // Hotel Settings DTO - Config riêng cho từng hotel (cho BrandAdmin edit)
@@ -177,6 +175,7 @@ namespace Hotel_SAAS_Backend.API.Models.DTOs
         public float? AverageRating { get; set; }
         public int ReviewCount { get; set; }
         public decimal? MinPrice { get; set; }
+        public decimal? CommissionRate { get; set; }
     }
 
     public class HotelDetailDto : HotelDto

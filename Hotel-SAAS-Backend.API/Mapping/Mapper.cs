@@ -86,7 +86,7 @@ namespace Hotel_SAAS_Backend.API.Mapping
                 Country = entity.Country,
                 IsActive = entity.IsActive,
                 HotelCount = entity.Hotels != null ? entity.Hotels.Count : 0,
-                CommissionRate = entity.CommissionRate,
+                CommissionRate = activeSubscription?.Plan?.CommissionRate,
                 SubscriptionPlan = activeSubscription?.Plan?.Name,
                 SubscriptionStatus = activeSubscription?.Status.ToString()
             };
@@ -108,7 +108,6 @@ namespace Hotel_SAAS_Backend.API.Mapping
                 PostalCode = dto.PostalCode,
                 TaxId = dto.TaxId,
                 BusinessLicense = dto.BusinessLicense,
-                CommissionRate = dto.CommissionRate,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -128,7 +127,6 @@ namespace Hotel_SAAS_Backend.API.Mapping
             if (dto.Country != null) entity.Country = dto.Country;
             if (dto.PostalCode != null) entity.PostalCode = dto.PostalCode;
             if (dto.IsActive.HasValue) entity.IsActive = dto.IsActive.Value;
-            if (dto.CommissionRate != null) entity.CommissionRate = dto.CommissionRate;
             entity.UpdatedAt = DateTime.UtcNow;
         }
 
@@ -153,6 +151,7 @@ namespace Hotel_SAAS_Backend.API.Mapping
                 StarRating = entity.StarRating,
                 IsActive = entity.IsActive,
                 IsVerified = entity.IsVerified,
+                CommissionRate = entity.Brand?.Subscriptions?.OrderByDescending(s => s.CreatedAt).FirstOrDefault()?.Plan?.CommissionRate,
                 AverageRating = entity.AverageRating,
                 ReviewCount = entity.ReviewCount,
                 MinPrice = entity.Rooms?.Any() == true ? entity.Rooms.Min(r => r.BasePrice) : null
@@ -179,6 +178,7 @@ namespace Hotel_SAAS_Backend.API.Mapping
                 AverageRating = entity.AverageRating,
                 ReviewCount = entity.ReviewCount,
                 MinPrice = entity.Rooms?.Any() == true ? entity.Rooms.Min(r => r.BasePrice) : null,
+                CommissionRate = entity.Brand?.Subscriptions?.OrderByDescending(s => s.CreatedAt).FirstOrDefault()?.Plan?.CommissionRate,
                 Address = entity.Address,
                 State = entity.State,
                 PostalCode = entity.PostalCode,
@@ -309,7 +309,6 @@ namespace Hotel_SAAS_Backend.API.Mapping
                 ChildPolicy = dto.ChildPolicy,
                 PetPolicy = dto.PetPolicy,
                 TotalRooms = dto.TotalRooms,
-                CommissionRate = dto.CommissionRate,
                 IsActive = true,
                 IsVerified = false,
                 CreatedAt = DateTime.UtcNow,
@@ -341,7 +340,32 @@ namespace Hotel_SAAS_Backend.API.Mapping
             if (dto.ChildPolicy != null) entity.ChildPolicy = dto.ChildPolicy;
             if (dto.PetPolicy != null) entity.PetPolicy = dto.PetPolicy;
             if (dto.TotalRooms.HasValue) entity.TotalRooms = dto.TotalRooms.Value;
-            if (dto.CommissionRate.HasValue) entity.CommissionRate = dto.CommissionRate.Value;
+            if (dto.TotalRooms.HasValue) entity.TotalRooms = dto.TotalRooms.Value;
+            
+            // Guest Config
+            if (dto.MaxAdultsPerRoom.HasValue) entity.MaxAdultsPerRoom = dto.MaxAdultsPerRoom.Value;
+            if (dto.MaxChildrenPerRoom.HasValue) entity.MaxChildrenPerRoom = dto.MaxChildrenPerRoom.Value;
+            if (dto.MaxGuestsPerRoom.HasValue) entity.MaxGuestsPerRoom = dto.MaxGuestsPerRoom.Value;
+            if (dto.AllowExtraBed.HasValue) entity.AllowExtraBed = dto.AllowExtraBed.Value;
+            if (dto.ExtraBedPrice.HasValue) entity.ExtraBedPrice = dto.ExtraBedPrice.Value;
+
+            // Booking Rules
+            if (dto.MinNights.HasValue) entity.MinNights = dto.MinNights.Value;
+            if (dto.MaxNights.HasValue) entity.MaxNights = dto.MaxNights.Value;
+            if (dto.MinAdvanceBookingHours.HasValue) entity.MinAdvanceBookingHours = dto.MinAdvanceBookingHours.Value;
+            if (dto.MaxAdvanceBookingDays.HasValue) entity.MaxAdvanceBookingDays = dto.MaxAdvanceBookingDays.Value;
+
+            // Payment Config
+            if (dto.EnableStripePayment.HasValue) entity.EnableStripePayment = dto.EnableStripePayment.Value;
+            if (dto.EnablePayAtHotel.HasValue) entity.EnablePayAtHotel = dto.EnablePayAtHotel.Value;
+            if (dto.StripeAccountId != null) entity.StripeAccountId = dto.StripeAccountId;
+
+            // Tax & Fee Config
+            if (dto.TaxRate.HasValue) entity.TaxRate = dto.TaxRate.Value;
+            if (dto.ServiceFeeRate.HasValue) entity.ServiceFeeRate = dto.ServiceFeeRate.Value;
+
+            // Additional Policies
+            if (dto.SmokingPolicy != null) entity.SmokingPolicy = dto.SmokingPolicy;
             entity.UpdatedAt = DateTime.UtcNow;
         }
 

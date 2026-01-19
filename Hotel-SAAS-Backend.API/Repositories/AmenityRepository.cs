@@ -12,6 +12,16 @@ namespace Hotel_SAAS_Backend.API.Repositories
         {
             return await _dbSet
                 .AsNoTracking()
+                .Where(a => !a.IsDeleted)
+                .OrderBy(a => a.Type)
+                .ThenBy(a => a.Name)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Amenity>> GetActiveAsync()
+        {
+            return await _dbSet
+                .AsNoTracking()
                 .Where(a => !a.IsDeleted && a.IsActive)
                 .OrderBy(a => a.Type)
                 .ThenBy(a => a.Name)
@@ -19,6 +29,15 @@ namespace Hotel_SAAS_Backend.API.Repositories
         }
 
         public async Task<IEnumerable<Amenity>> GetByTypeAsync(AmenityType type)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Where(a => a.Type == type && !a.IsDeleted)
+                .OrderBy(a => a.Name)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Amenity>> GetActiveByTypeAsync(AmenityType type)
         {
             return await _dbSet
                 .AsNoTracking()
