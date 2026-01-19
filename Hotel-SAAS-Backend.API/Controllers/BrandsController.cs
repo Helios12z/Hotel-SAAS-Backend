@@ -104,7 +104,7 @@ namespace Hotel_SAAS_Backend.API.Controllers
             return Ok(new ApiResponseDto<bool>
             {
                 Success = result,
-                Message = result ? Messages.Subscription.Updated : Messages.Subscription.BrandUpdated,
+                Message = result ? Messages.Platform.BrandDeleted : Messages.Platform.BrandDeleteFailed,
                 Data = result
             });
         }

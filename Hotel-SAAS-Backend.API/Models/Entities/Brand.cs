@@ -24,5 +24,6 @@ namespace Hotel_SAAS_Backend.API.Models.Entities
 
         // Navigation properties
         public virtual ICollection<Hotel> Hotels { get; set; } = new List<Hotel>();
+        public virtual ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
     }
 }

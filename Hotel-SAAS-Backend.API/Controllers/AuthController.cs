@@ -31,6 +31,11 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 });
             }
 
+            if (!string.IsNullOrEmpty(result.RefreshToken))
+            {
+                SetRefreshTokenCookie(result.RefreshToken);
+            }
+
             return Ok(new ApiResponseDto<AuthResponseDto>
             {
                 Success = true,
@@ -52,6 +57,11 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 });
             }
 
+            if (!string.IsNullOrEmpty(result.RefreshToken))
+            {
+                SetRefreshTokenCookie(result.RefreshToken);
+            }
+
             return Ok(new ApiResponseDto<AuthResponseDto>
             {
                 Success = true,
@@ -63,6 +73,12 @@ namespace Hotel_SAAS_Backend.API.Controllers
         [HttpPost("refresh-token")]
         public async Task<ActionResult<ApiResponseDto<AuthResponseDto>>> RefreshToken([FromBody] RefreshTokenDto refreshTokenDto)
         {
+            // If RefreshToken is missing from body, try to get it from cookie
+            if (string.IsNullOrEmpty(refreshTokenDto.RefreshToken))
+            {
+                refreshTokenDto.RefreshToken = Request.Cookies["refreshToken"] ?? "";
+            }
+
             var result = await _authService.RefreshTokenAsync(refreshTokenDto);
             if (result == null)
             {
@@ -71,6 +87,11 @@ namespace Hotel_SAAS_Backend.API.Controllers
                     Success = false,
                     Message = Messages.Auth.InvalidRefreshToken
                 });
+            }
+
+            if (!string.IsNullOrEmpty(result.RefreshToken))
+            {
+                SetRefreshTokenCookie(result.RefreshToken);
             }
 
             return Ok(new ApiResponseDto<AuthResponseDto>
@@ -87,6 +108,11 @@ namespace Hotel_SAAS_Backend.API.Controllers
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var result = await _authService.LogoutAsync(userId);
+
+            if (result)
+            {
+                Response.Cookies.Delete("refreshToken");
+            }
 
             return Ok(new ApiResponseDto<bool>
             {
@@ -153,6 +179,18 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 Message = Messages.Auth.ResetPasswordSuccess,
                 Data = true
             });
+        }
+
+        private void SetRefreshTokenCookie(string refreshToken)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(30)
+            };
+            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
         }
     }
 }

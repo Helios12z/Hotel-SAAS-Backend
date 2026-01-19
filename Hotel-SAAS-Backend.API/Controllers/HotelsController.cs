@@ -256,5 +256,52 @@ namespace Hotel_SAAS_Backend.API.Controllers
                 Data = result
             });
         }
+
+        // Hotel Amenities
+        [HttpGet("{id}/amenities")]
+        [Authorize(Policy = "Permission:hotels.read")]
+        public async Task<ActionResult<ApiResponseDto<IEnumerable<AmenityDto>>>> GetHotelAmenities(Guid id)
+        {
+            if (!await _permissionContext.CanAccessHotelAsync(id, Permissions.Hotels.Read))
+            {
+                return Forbid();
+            }
+
+            var amenities = await _hotelService.GetHotelAmenitiesAsync(id);
+            return Ok(new ApiResponseDto<IEnumerable<AmenityDto>>
+            {
+                Success = true,
+                Data = amenities
+            });
+        }
+
+        [Authorize(Policy = "Permission:hotels.update")]
+        [HttpPut("{id}/amenities")]
+        public async Task<ActionResult<ApiResponseDto<bool>>> UpdateHotelAmenities(Guid id, [FromBody] List<Guid> amenityIds)
+        {
+            if (!await _permissionContext.CanAccessHotelAsync(id, Permissions.Hotels.Update))
+            {
+                return Forbid();
+            }
+
+            try
+            {
+                var result = await _hotelService.UpdateHotelAmenitiesAsync(id, amenityIds);
+                return Ok(new ApiResponseDto<bool>
+                {
+                    Success = result,
+                    Message = Messages.Hotel.Updated,
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponseDto<bool>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
     }
 }

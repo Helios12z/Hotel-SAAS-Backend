@@ -123,6 +123,9 @@ namespace Hotel_SAAS_Backend.API.Models.Constants
             public const string InvoicePayFailed = "Thanh toán hóa đơn thất bại";
             public const string NewPlanNotFound = "Không tìm thấy gói cước mới";
             public const string PlanLimitReached = "Đã đạt giới hạn tối đa của gói dịch vụ";
+            public const string PlanLimitReachedHotels = "Đã đạt giới hạn số khách sạn tối đa. Vui lòng nâng cấp gói dịch vụ.";
+            public const string PlanLimitReachedRooms = "Đã đạt giới hạn số phòng tối đa. Vui lòng nâng cấp gói dịch vụ.";
+            public const string PlanLimitReachedUsers = "Đã đạt giới hạn số người dùng tối đa. Vui lòng nâng cấp gói dịch vụ.";
             public const string CanAddHotel = "Bạn có thể thêm khách sạn mới";
             public const string CanAddRoom = "Bạn có thể thêm phòng mới";
             public const string CanAddUser = "Bạn có thể thêm người dùng mới";

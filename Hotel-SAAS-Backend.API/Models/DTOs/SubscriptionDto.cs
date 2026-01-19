@@ -17,16 +17,6 @@ namespace Hotel_SAAS_Backend.API.Models.DTOs
         public int MaxRoomsPerHotel { get; set; }
         public int MaxUsersPerHotel { get; set; }
         public decimal CommissionRate { get; set; }
-        public bool HasAnalytics { get; set; }
-        public bool HasAdvancedReporting { get; set; }
-        public bool HasApiAccess { get; set; }
-        public bool HasPrioritySupport { get; set; }
-        public bool HasChannelManager { get; set; }
-        public bool HasRevenueManagement { get; set; }
-        public bool HasMultiLanguage { get; set; }
-        public bool HasCustomBranding { get; set; }
-        public bool HasDedicatedAccountManager { get; set; }
-        public int TrialDays { get; set; }
         public bool IsActive { get; set; }
         public bool IsPopular { get; set; }
     }
@@ -44,16 +34,6 @@ namespace Hotel_SAAS_Backend.API.Models.DTOs
         public int MaxRoomsPerHotel { get; set; } = 50;
         public int MaxUsersPerHotel { get; set; } = 5;
         public decimal CommissionRate { get; set; } = 15;
-        public bool HasAnalytics { get; set; }
-        public bool HasAdvancedReporting { get; set; }
-        public bool HasApiAccess { get; set; }
-        public bool HasPrioritySupport { get; set; }
-        public bool HasChannelManager { get; set; }
-        public bool HasRevenueManagement { get; set; }
-        public bool HasMultiLanguage { get; set; }
-        public bool HasCustomBranding { get; set; }
-        public bool HasDedicatedAccountManager { get; set; }
-        public int TrialDays { get; set; } = 14;
         public bool IsPopular { get; set; }
         public int SortOrder { get; set; }
     }
@@ -69,16 +49,6 @@ namespace Hotel_SAAS_Backend.API.Models.DTOs
         public int? MaxRoomsPerHotel { get; set; }
         public int? MaxUsersPerHotel { get; set; }
         public decimal? CommissionRate { get; set; }
-        public bool? HasAnalytics { get; set; }
-        public bool? HasAdvancedReporting { get; set; }
-        public bool? HasApiAccess { get; set; }
-        public bool? HasPrioritySupport { get; set; }
-        public bool? HasChannelManager { get; set; }
-        public bool? HasRevenueManagement { get; set; }
-        public bool? HasMultiLanguage { get; set; }
-        public bool? HasCustomBranding { get; set; }
-        public bool? HasDedicatedAccountManager { get; set; }
-        public int? TrialDays { get; set; }
         public bool? IsActive { get; set; }
         public bool? IsPopular { get; set; }
         public int? SortOrder { get; set; }

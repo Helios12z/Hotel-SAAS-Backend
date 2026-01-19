@@ -14,5 +14,9 @@ namespace Hotel_SAAS_Backend.API.Interfaces.Services
         Task<bool> DeleteHotelAsync(Guid id);
         Task<bool> UpdateHotelImagesAsync(Guid id, List<HotelImageDto> images);
         Task<PagedResultDto<HotelSearchResultDto>> SearchHotelsAdvancedAsync(HotelSearchRequestDto request);
+
+        // Hotel Amenities
+        Task<IEnumerable<AmenityDto>> GetHotelAmenitiesAsync(Guid hotelId);
+        Task<bool> UpdateHotelAmenitiesAsync(Guid hotelId, List<Guid> amenityIds);
     }
 }

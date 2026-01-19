@@ -152,7 +152,7 @@ namespace Hotel_SAAS_Backend.API.Data
                 Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
                 Name = "Marriott Hotels & Resorts",
                 Description = "World-renowned hospitality brand offering exceptional service and luxurious accommodations across the globe.",
-                LogoUrl = "https://example.com/logos/marriott.png",
+                LogoUrl = null,
                 Website = "https://www.marriott.com",
                 PhoneNumber = "+1-800-228-9290",
                 Email = "info@marriott.com",
@@ -160,7 +160,7 @@ namespace Hotel_SAAS_Backend.API.Data
                 City = "Bethesda",
                 Country = "United States",
                 IsActive = true,
-                CommissionRate = "15",
+                CommissionRate = "8",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -171,7 +171,7 @@ namespace Hotel_SAAS_Backend.API.Data
                 Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
                 Name = "Hilton Worldwide",
                 Description = "Leading hospitality company with over 6,000 properties across 119 countries, delivering exceptional experiences.",
-                LogoUrl = "https://example.com/logos/hilton.png",
+                LogoUrl = null,
                 Website = "https://www.hilton.com",
                 PhoneNumber = "+1-800-445-8667",
                 Email = "info@hilton.com",
@@ -179,12 +179,99 @@ namespace Hotel_SAAS_Backend.API.Data
                 City = "McLean",
                 Country = "United States",
                 IsActive = true,
-                CommissionRate = "15",
+                CommissionRate = "12",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
             await context.Brands.AddAsync(hiltonBrand);
 
+            var interconBrand = new Brand
+            {
+                Id = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+                Name = "InterContinental Hotels Group",
+                Description = "IHG Hotels & Resorts is a global hospitality company with a wide range of luxury and boutique brands.",
+                LogoUrl = null,
+                Website = "https://www.ihg.com",
+                PhoneNumber = "+1-877-424-2449",
+                Email = "info@ihg.com",
+                Address = "Three Ravinia Drive, Atlanta, GA 30346, USA",
+                City = "Atlanta",
+                Country = "United States",
+                IsActive = true,
+                CommissionRate = "15",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            await context.Brands.AddAsync(interconBrand);
+
+            var accorBrand = new Brand
+            {
+                Id = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"),
+                Name = "Accor Hotels",
+                Description = "A world-leading hospitality group offering unique experiences in more than 5,000 hotels across 110 countries.",
+                LogoUrl = null,
+                Website = "https://all.accor.com",
+                PhoneNumber = "+33-1-45-38-86-00",
+                Email = "info@accor.com",
+                Address = "82 Rue Henri Farman, 92130 Issy-les-Moulineaux, France",
+                City = "Paris",
+                Country = "France",
+                IsActive = true,
+                CommissionRate = "15",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            await context.Brands.AddAsync(accorBrand);
+
+            await context.SaveChangesAsync();
+
+            // ============================================
+            // 3.5 SEED SUBSCRIPTIONS
+            // ============================================
+            var subscriptions = new List<Subscription>
+            {
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    BrandId = marriottBrand.Id,
+                    PlanId = Guid.Parse("11111111-0000-0000-0000-000000000003"), // Premium
+                    Status = SubscriptionStatus.Active,
+                    StartDate = DateTime.UtcNow.AddMonths(-2),
+                    EndDate = DateTime.UtcNow.AddMonths(10),
+                    CreatedAt = DateTime.UtcNow.AddMonths(-2)
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    BrandId = hiltonBrand.Id,
+                    PlanId = Guid.Parse("11111111-0000-0000-0000-000000000002"), // Professional
+                    Status = SubscriptionStatus.Active,
+                    StartDate = DateTime.UtcNow.AddMonths(-1),
+                    EndDate = DateTime.UtcNow.AddMonths(11),
+                    CreatedAt = DateTime.UtcNow.AddMonths(-1)
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    BrandId = interconBrand.Id,
+                    PlanId = Guid.Parse("11111111-0000-0000-0000-000000000001"), // Basic
+                    Status = SubscriptionStatus.Active,
+                    StartDate = DateTime.UtcNow.AddDays(-15),
+                    EndDate = DateTime.UtcNow.AddDays(350),
+                    CreatedAt = DateTime.UtcNow.AddDays(-15)
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    BrandId = accorBrand.Id,
+                    PlanId = Guid.Parse("11111111-0000-0000-0000-000000000001"), // Basic (Trial)
+                    Status = SubscriptionStatus.Trial,
+                    StartDate = DateTime.UtcNow.AddDays(-5),
+                    EndDate = DateTime.UtcNow.AddDays(25),
+                    CreatedAt = DateTime.UtcNow.AddDays(-5)
+                }
+            };
+            await context.Subscriptions.AddRangeAsync(subscriptions);
             await context.SaveChangesAsync();
 
             // ============================================
@@ -306,6 +393,77 @@ namespace Hotel_SAAS_Backend.API.Data
                 UpdatedAt = DateTime.UtcNow
             };
             await context.Hotels.AddAsync(parisHotel);
+
+            var londonHotel = new Hotel
+            {
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000004"),
+                BrandId = interconBrand.Id,
+                Name = "InterContinental London Park Lane",
+                Description = "Located at one of the capital's most prestigious addresses, InterContinental London Park Lane presents modern luxury in the heart of Mayfair.",
+                ImageUrl = "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800",
+                CoverImageUrl = "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=1200",
+                Address = "One Hamilton Place, Park Lane, London W1J 7QY",
+                City = "London",
+                Country = "United Kingdom",
+                PostalCode = "W1J 7QY",
+                Latitude = 51.5038,
+                Longitude = -0.1506,
+                PhoneNumber = "+44-20-7409-3131",
+                Email = "reservations.london@ihg.com",
+                Website = "https://www.ihg.com/intercontinental/hotels/gb/en/london/lonhb/hoteldetail",
+                StarRating = 5,
+                IsActive = true,
+                IsVerified = true,
+                CheckInTime = "15:00",
+                CheckOutTime = "12:00",
+                CancellationPolicy = "Free cancellation up to 24 hours before check-in",
+                ChildPolicy = "Children stay free",
+                PetPolicy = "Pets allowed",
+                TotalRooms = 447,
+                NumberOfFloors = 8,
+                CommissionRate = 12,
+                AverageRating = 4.7f,
+                ReviewCount = 3210,
+                YearBuilt = DateTime.SpecifyKind(new DateTime(1960, 1, 1), DateTimeKind.Utc),
+                YearRenovated = DateTime.SpecifyKind(new DateTime(2020, 1, 1), DateTimeKind.Utc),
+                Embedding = GenerateMockEmbedding(1024),
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            await context.Hotels.AddAsync(londonHotel);
+
+            var tokyoHotel = new Hotel
+            {
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000005"),
+                BrandId = accorBrand.Id,
+                Name = "Sofitel Tokyo City",
+                Description = "Experience the essence of French 'art de vivre' in the heart of Tokyo. A perfect blend of luxury and convenience.",
+                ImageUrl = "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800",
+                CoverImageUrl = "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=1200",
+                Address = "1-1-1 City Center, Tokyo",
+                City = "Tokyo",
+                Country = "Japan",
+                PostalCode = "100-0001",
+                Latitude = 35.6895,
+                Longitude = 139.6917,
+                PhoneNumber = "+81-3-1234-5678",
+                Email = "reservations.tokyo@sofitel.com",
+                Website = "https://all.accor.com/sofitel/tokyo",
+                StarRating = 5,
+                IsActive = true,
+                IsVerified = true,
+                CheckInTime = "15:00",
+                CheckOutTime = "11:00",
+                TotalRooms = 350,
+                NumberOfFloors = 25,
+                CommissionRate = 15,
+                AverageRating = 4.6f,
+                ReviewCount = 1500,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Embedding = GenerateMockEmbedding(1024)
+            };
+            await context.Hotels.AddAsync(tokyoHotel);
 
             await context.SaveChangesAsync();
 
@@ -543,100 +701,103 @@ namespace Hotel_SAAS_Backend.API.Data
             await context.SaveChangesAsync();
 
             // ============================================
-            // 10. SEED SAMPLE BOOKINGS
+            // 10. SEED SAMPLE BOOKINGS, PAYMENTS & REVIEWS
             // ============================================
-            var tomorrow = DateTime.UtcNow.AddDays(1);
-            var checkOut = tomorrow.AddDays(3);
-
-            var booking = new Booking
+            var random = new Random();
+            var hotels = new List<Hotel> { nyHotel, laHotel, parisHotel, londonHotel, tokyoHotel };
+            var bookingStatuses = new[] { BookingStatus.Confirmed, BookingStatus.CheckedIn, BookingStatus.CheckedOut, BookingStatus.Cancelled };
+            var paymentMethods = new[] { "CreditCard", "BankTransfer", "Cash" };
+            
+            foreach (var hotel in hotels)
             {
-                Id = Guid.NewGuid(),
-                HotelId = nyHotel.Id,
-                GuestId = guestUser.Id,
-                ConfirmationNumber = "BK" + DateTime.UtcNow.Ticks.ToString().Substring(10),
-                CheckInDate = tomorrow,
-                CheckOutDate = checkOut,
-                NumberOfGuests = 2,
-                NumberOfRooms = 1,
-                Subtotal = 13470000m,
-                TaxAmount = 1347000m,
-                ServiceFee = 673500m,
-                DiscountAmount = 0,
-                TotalAmount = 15490500m,
-                Currency = "VND",
-                Status = BookingStatus.Confirmed,
-                GuestName = "Jane Doe",
-                GuestEmail = "guest@example.com",
-                GuestPhoneNumber = "+1-555-0101",
-                PaymentMethod = "BankTransfer",
-                IsPaid = true,
-                BookedAt = DateTime.UtcNow.AddDays(-5),
-                ConfirmedAt = DateTime.UtcNow.AddDays(-4),
-                CreatedAt = DateTime.UtcNow.AddDays(-5),
-                UpdatedAt = DateTime.UtcNow.AddDays(-5)
-            };
-            await context.Bookings.AddAsync(booking);
-            await context.SaveChangesAsync();
+                // Generate ~20 bookings for each hotel in the last 30 days
+                for (int i = 0; i < 25; i++)
+                {
+                    var bookedAt = DateTime.UtcNow.AddDays(-random.Next(1, 30));
+                    var checkInDate = bookedAt.AddDays(random.Next(1, 14));
+                    var checkOutDate = checkInDate.AddDays(random.Next(1, 7));
+                    var status = bookingStatuses[random.Next(bookingStatuses.Length)];
+                    var subtotal = random.Next(100, 1000) * 10000m; // 1M to 10M VND
+                    var totalAmount = subtotal * 1.11m; // Including tax and fees
 
-            // Add booking room
-            var bookedRoom = rooms.First(r => r.Type == RoomType.Deluxe);
-            context.BookingRooms.Add(new BookingRoom
-            {
-                BookingId = booking.Id,
-                RoomId = bookedRoom.Id,
-                Price = 4490000m,
-                NumberOfAdults = 2,
-                NumberOfChildren = 0,
-                NumberOfInfants = 0
-            });
-            await context.SaveChangesAsync();
+                    var bookingId = Guid.NewGuid();
+                    var bookingRecord = new Booking
+                    {
+                        Id = bookingId,
+                        HotelId = hotel.Id,
+                        GuestId = guestUser.Id,
+                        ConfirmationNumber = "BK" + random.Next(100000, 999999),
+                        CheckInDate = checkInDate,
+                        CheckOutDate = checkOutDate,
+                        NumberOfGuests = random.Next(1, 4),
+                        NumberOfRooms = 1,
+                        Subtotal = subtotal,
+                        TaxAmount = subtotal * 0.1m,
+                        ServiceFee = subtotal * 0.05m,
+                        TotalAmount = totalAmount,
+                        Currency = "VND",
+                        Status = status,
+                        GuestName = i % 2 == 0 ? "John Smith" : "David Wilson",
+                        GuestEmail = i % 2 == 0 ? "john@example.com" : "david@example.com",
+                        GuestPhoneNumber = "+1-555-" + random.Next(1000, 9999),
+                        PaymentMethod = paymentMethods[random.Next(paymentMethods.Length)],
+                        IsPaid = status != BookingStatus.Cancelled,
+                        BookedAt = bookedAt,
+                        ConfirmedAt = bookedAt.AddMinutes(random.Next(5, 60)),
+                        CreatedAt = bookedAt,
+                        UpdatedAt = bookedAt
+                    };
+                    await context.Bookings.AddAsync(bookingRecord);
 
-            // ============================================
-            // 11. SEED SAMPLE REVIEWS
-            // ============================================
-            var review = new Review
-            {
-                Id = Guid.NewGuid(),
-                HotelId = nyHotel.Id,
-                GuestId = guestUser.Id,
-                BookingId = booking.Id,
-                Rating = 5,
-                Title = "Amazing stay in Times Square!",
-                Comment = "The hotel exceeded all our expectations. The room was spotless, the staff was incredibly friendly, and the location couldn't be better - right in the heart of Times Square! The rooftop bar offers breathtaking views of the city. Will definitely be back!",
-                CleanlinessRating = 5,
-                ServiceRating = 5,
-                LocationRating = 5,
-                ValueRating = 4,
-                IsVerified = true,
-                StayDate = tomorrow,
-                Status = ReviewStatus.Approved,
-                PublishedAt = DateTime.UtcNow.AddDays(-3),
-                Embedding = GenerateMockEmbedding(1024),
-                CreatedAt = DateTime.UtcNow.AddDays(-3),
-                UpdatedAt = DateTime.UtcNow.AddDays(-3)
-            };
-            await context.Reviews.AddAsync(review);
-            await context.SaveChangesAsync();
+                    // Add Payment for paid bookings
+                    if (bookingRecord.IsPaid)
+                    {
+                        var paymentRecord = new Payment
+                        {
+                            Id = Guid.NewGuid(),
+                            BookingId = bookingId,
+                            TransactionId = "TXN" + random.Next(1000000, 9999999),
+                            Amount = totalAmount,
+                            Currency = "VND",
+                            Method = (PaymentMethod)Enum.Parse(typeof(PaymentMethod), bookingRecord.PaymentMethod),
+                            Status = PaymentStatus.Completed,
+                            ProcessedAt = bookedAt.AddMinutes(random.Next(60, 120)),
+                            Gateway = "VNPay",
+                            CreatedAt = bookedAt,
+                            UpdatedAt = bookedAt
+                        };
+                        await context.Payments.AddAsync(paymentRecord);
+                    }
 
-            // ============================================
-            // 12. SEED SAMPLE PAYMENT
-            // ============================================
-            var payment = new Payment
-            {
-                Id = Guid.NewGuid(),
-                BookingId = booking.Id,
-                TransactionId = "TXN" + DateTime.UtcNow.Ticks,
-                Amount = 15490500m,
-                Currency = "VND",
-                Method = PaymentMethod.BankTransfer,
-                Status = PaymentStatus.Completed,
-                ProcessedAt = DateTime.UtcNow.AddDays(-4),
-                Gateway = "VNPay",
-                CardLast4Digits = null,
-                CreatedAt = DateTime.UtcNow.AddDays(-4),
-                UpdatedAt = DateTime.UtcNow.AddDays(-4)
-            };
-            await context.Payments.AddAsync(payment);
+                    // Add Review for checked out bookings
+                    if (status == BookingStatus.CheckedOut && random.Next(0, 2) == 1)
+                    {
+                        var rating = random.Next(3, 6);
+                        var reviewRecord = new Review
+                        {
+                            Id = Guid.NewGuid(),
+                            HotelId = hotel.Id,
+                            GuestId = guestUser.Id,
+                            BookingId = bookingId,
+                            Rating = rating,
+                            Title = rating >= 4 ? "Great Experience" : "Good stay",
+                            Comment = "Generated review for testing dashboard charts and ratings.",
+                            CleanlinessRating = random.Next(3, 6),
+                            ServiceRating = random.Next(3, 6),
+                            LocationRating = random.Next(4, 6),
+                            ValueRating = random.Next(3, 6),
+                            IsVerified = true,
+                            StayDate = checkInDate,
+                            Status = ReviewStatus.Approved,
+                            PublishedAt = checkOutDate.AddDays(random.Next(1, 3)),
+                            CreatedAt = checkOutDate.AddDays(random.Next(1, 3)),
+                            UpdatedAt = checkOutDate.AddDays(random.Next(1, 3)),
+                            Embedding = GenerateMockEmbedding(1024)
+                        };
+                        await context.Reviews.AddAsync(reviewRecord);
+                    }
+                }
+            }
 
             // Save all changes
             await context.SaveChangesAsync();
@@ -668,16 +829,6 @@ namespace Hotel_SAAS_Backend.API.Data
                     MaxRoomsPerHotel = 20,
                     MaxUsersPerHotel = 3,
                     CommissionRate = 15,
-                    HasAnalytics = true,
-                    HasAdvancedReporting = false,
-                    HasApiAccess = false,
-                    HasPrioritySupport = false,
-                    HasChannelManager = false,
-                    HasRevenueManagement = false,
-                    HasMultiLanguage = false,
-                    HasCustomBranding = false,
-                    HasDedicatedAccountManager = false,
-                    TrialDays = 14,
                     IsActive = true,
                     IsPopular = false,
                     SortOrder = 1
@@ -696,16 +847,6 @@ namespace Hotel_SAAS_Backend.API.Data
                     MaxRoomsPerHotel = 100,
                     MaxUsersPerHotel = 10,
                     CommissionRate = 12,
-                    HasAnalytics = true,
-                    HasAdvancedReporting = true,
-                    HasApiAccess = true,
-                    HasPrioritySupport = true,
-                    HasChannelManager = true,
-                    HasRevenueManagement = false,
-                    HasMultiLanguage = true,
-                    HasCustomBranding = false,
-                    HasDedicatedAccountManager = false,
-                    TrialDays = 14,
                     IsActive = true,
                     IsPopular = true, // Most popular plan
                     SortOrder = 2
@@ -724,16 +865,6 @@ namespace Hotel_SAAS_Backend.API.Data
                     MaxRoomsPerHotel = 999,
                     MaxUsersPerHotel = 999,
                     CommissionRate = 8,
-                    HasAnalytics = true,
-                    HasAdvancedReporting = true,
-                    HasApiAccess = true,
-                    HasPrioritySupport = true,
-                    HasChannelManager = true,
-                    HasRevenueManagement = true,
-                    HasMultiLanguage = true,
-                    HasCustomBranding = true,
-                    HasDedicatedAccountManager = true,
-                    TrialDays = 30,
                     IsActive = true,
                     IsPopular = false,
                     SortOrder = 3

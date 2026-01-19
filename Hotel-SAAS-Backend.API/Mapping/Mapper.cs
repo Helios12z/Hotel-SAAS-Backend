@@ -68,6 +68,8 @@ namespace Hotel_SAAS_Backend.API.Mapping
 
         public static BrandDto ToDto(Brand entity)
         {
+            var activeSubscription = entity.Subscriptions?.OrderByDescending(s => s.CreatedAt).FirstOrDefault();
+            
             return new BrandDto
             {
                 Id = entity.Id,
@@ -83,7 +85,10 @@ namespace Hotel_SAAS_Backend.API.Mapping
                 City = entity.City,
                 Country = entity.Country,
                 IsActive = entity.IsActive,
-                HotelCount = entity.Hotels != null ? entity.Hotels.Count : 0
+                HotelCount = entity.Hotels != null ? entity.Hotels.Count : 0,
+                CommissionRate = entity.CommissionRate,
+                SubscriptionPlan = activeSubscription?.Plan?.Name,
+                SubscriptionStatus = activeSubscription?.Status.ToString()
             };
         }
 
@@ -103,6 +108,7 @@ namespace Hotel_SAAS_Backend.API.Mapping
                 PostalCode = dto.PostalCode,
                 TaxId = dto.TaxId,
                 BusinessLicense = dto.BusinessLicense,
+                CommissionRate = dto.CommissionRate,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -122,6 +128,7 @@ namespace Hotel_SAAS_Backend.API.Mapping
             if (dto.Country != null) entity.Country = dto.Country;
             if (dto.PostalCode != null) entity.PostalCode = dto.PostalCode;
             if (dto.IsActive.HasValue) entity.IsActive = dto.IsActive.Value;
+            if (dto.CommissionRate != null) entity.CommissionRate = dto.CommissionRate;
             entity.UpdatedAt = DateTime.UtcNow;
         }
 

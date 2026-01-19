@@ -204,6 +204,13 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    
+    // Check if we need to force recreate the database (useful for development)
+    if (app.Environment.IsDevelopment() && builder.Configuration.GetValue<bool>("SeedData:ForceRecreate"))
+    {
+        db.Database.EnsureDeleted();
+    }
+
     db.Database.Migrate();
     
     // Seed initial data

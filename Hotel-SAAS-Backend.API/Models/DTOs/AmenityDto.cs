@@ -27,5 +27,7 @@ namespace Hotel_SAAS_Backend.API.Models.DTOs
         public string? Icon { get; set; }
         public AmenityType Type { get; set; }
         public bool IsActive { get; set; }
+        public bool IsComplimentary { get; set; }
+        public decimal AdditionalCost { get; set; }
     }
 }

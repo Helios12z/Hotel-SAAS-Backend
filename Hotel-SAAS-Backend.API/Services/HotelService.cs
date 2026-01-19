@@ -1,3 +1,4 @@
+using Hotel_SAAS_Backend.API.Data;
 using Hotel_SAAS_Backend.API.Interfaces.Repositories;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Mapping;
@@ -5,10 +6,14 @@ using Hotel_SAAS_Backend.API.Models.DTOs;
 using Hotel_SAAS_Backend.API.Models.Constants;
 using Hotel_SAAS_Backend.API.Models.Entities;
 using Hotel_SAAS_Backend.API.Models.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hotel_SAAS_Backend.API.Services
 {
-    public class HotelService(IHotelRepository hotelRepository) : IHotelService
+    public class HotelService(
+        IHotelRepository hotelRepository,
+        ISubscriptionService subscriptionService,
+        ApplicationDbContext context) : IHotelService
     {
         public async Task<HotelDto?> GetHotelByIdAsync(Guid id)
         {
@@ -42,6 +47,12 @@ namespace Hotel_SAAS_Backend.API.Services
 
         public async Task<HotelDto> CreateHotelAsync(CreateHotelDto createHotelDto)
         {
+            // Check subscription limits before creating
+            if (!await subscriptionService.CanAddHotelAsync(createHotelDto.BrandId))
+            {
+                throw new Exception(Messages.Subscription.PlanLimitReachedHotels);
+            }
+
             var hotel = Mapper.ToEntity(createHotelDto);
             var createdHotel = await hotelRepository.CreateAsync(hotel);
             return Mapper.ToDto(createdHotel);
@@ -118,6 +129,51 @@ namespace Hotel_SAAS_Backend.API.Services
                 Page = request.Page,
                 PageSize = request.PageSize
             };
+        }
+
+        public async Task<IEnumerable<AmenityDto>> GetHotelAmenitiesAsync(Guid hotelId)
+        {
+            var hotelAmenities = await context.HotelAmenities
+                .Include(ha => ha.Amenity)
+                .Where(ha => ha.HotelId == hotelId && ha.Amenity!.IsActive)
+                .ToListAsync();
+
+            return hotelAmenities.Select(ha => new AmenityDto
+            {
+                Id = ha.Amenity!.Id,
+                Name = ha.Amenity.Name,
+                Description = ha.Amenity.Description,
+                Icon = ha.Amenity.Icon,
+                Type = ha.Amenity.Type,
+                IsComplimentary = ha.IsComplimentary,
+                AdditionalCost = ha.AdditionalCost ?? 0
+            });
+        }
+
+        public async Task<bool> UpdateHotelAmenitiesAsync(Guid hotelId, List<Guid> amenityIds)
+        {
+            var hotel = await hotelRepository.GetByIdAsync(hotelId);
+            if (hotel == null) throw new Exception(Messages.Hotel.NotFound);
+
+            // Remove existing hotel amenities
+            var existingAmenities = await context.HotelAmenities
+                .Where(ha => ha.HotelId == hotelId)
+                .ToListAsync();
+            context.HotelAmenities.RemoveRange(existingAmenities);
+
+            // Add new hotel amenities
+            foreach (var amenityId in amenityIds)
+            {
+                context.HotelAmenities.Add(new HotelAmenity
+                {
+                    HotelId = hotelId,
+                    AmenityId = amenityId,
+                    IsComplimentary = true
+                });
+            }
+
+            await context.SaveChangesAsync();
+            return true;
         }
     }
 }

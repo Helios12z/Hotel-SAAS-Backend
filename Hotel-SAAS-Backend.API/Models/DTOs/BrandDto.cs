@@ -48,5 +48,8 @@ namespace Hotel_SAAS_Backend.API.Models.DTOs
         public string? Country { get; set; }
         public bool IsActive { get; set; }
         public int HotelCount { get; set; }
+        public string? CommissionRate { get; set; }
+        public string? SubscriptionPlan { get; set; }
+        public string? SubscriptionStatus { get; set; }
     }
 }

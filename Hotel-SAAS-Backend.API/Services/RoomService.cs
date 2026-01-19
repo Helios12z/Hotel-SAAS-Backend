@@ -1,3 +1,4 @@
+using Hotel_SAAS_Backend.API.Data;
 using Hotel_SAAS_Backend.API.Interfaces.Repositories;
 using Hotel_SAAS_Backend.API.Interfaces.Services;
 using Hotel_SAAS_Backend.API.Mapping;
@@ -5,13 +6,16 @@ using Hotel_SAAS_Backend.API.Models.DTOs;
 using Hotel_SAAS_Backend.API.Models.Constants;
 using Hotel_SAAS_Backend.API.Models.Entities;
 using Hotel_SAAS_Backend.API.Models.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hotel_SAAS_Backend.API.Services
 {
     public class RoomService(
         IRoomRepository roomRepository,
         IHotelRepository hotelRepository,
-        IBookingRepository bookingRepository) : IRoomService
+        IBookingRepository bookingRepository,
+        ISubscriptionService subscriptionService,
+        ApplicationDbContext context) : IRoomService
     {
         public async Task<RoomDto?> GetRoomByIdAsync(Guid id)
         {
@@ -45,8 +49,43 @@ namespace Hotel_SAAS_Backend.API.Services
 
         public async Task<RoomDto> CreateRoomAsync(CreateRoomDto createRoomDto)
         {
+            // Check subscription limits before creating
+            if (!await subscriptionService.CanAddRoomAsync(createRoomDto.HotelId))
+            {
+                throw new Exception(Messages.Subscription.PlanLimitReachedRooms);
+            }
+
+            // Validate that all amenities exist in hotel's catalog
+            if (createRoomDto.AmenityIds.Any())
+            {
+                var hotelAmenityIds = await context.HotelAmenities
+                    .Where(ha => ha.HotelId == createRoomDto.HotelId)
+                    .Select(ha => ha.AmenityId)
+                    .ToListAsync();
+
+                var invalidAmenityIds = createRoomDto.AmenityIds.Except(hotelAmenityIds).ToList();
+                if (invalidAmenityIds.Any())
+                {
+                    throw new Exception("Một số tiện ích không có trong danh mục của khách sạn.");
+                }
+            }
+
             var room = Mapper.ToEntity(createRoomDto);
             var createdRoom = await roomRepository.CreateAsync(room);
+
+            // Create RoomAmenity records
+            foreach (var amenityId in createRoomDto.AmenityIds)
+            {
+                context.RoomAmenities.Add(new RoomAmenity
+                {
+                    RoomId = createdRoom.Id,
+                    AmenityId = amenityId,
+                    IsComplimentary = true,
+                    Quantity = 1
+                });
+            }
+            await context.SaveChangesAsync();
+
             return Mapper.ToDto(createdRoom);
         }
 

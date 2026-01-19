@@ -17,25 +17,14 @@ namespace Hotel_SAAS_Backend.API.Models.Entities
         public decimal YearlyPrice { get; set; }
         public string Currency { get; set; } = "USD";
         
+        // Trial
+        public int TrialDays { get; set; } = 14;
+        
         // Features & Limits
         public int MaxHotels { get; set; } = 1;
         public int MaxRoomsPerHotel { get; set; } = 50;
         public int MaxUsersPerHotel { get; set; } = 5;
         public decimal CommissionRate { get; set; } = 15; // Platform commission percentage
-        
-        // Feature Flags
-        public bool HasAnalytics { get; set; } = false;
-        public bool HasAdvancedReporting { get; set; } = false;
-        public bool HasApiAccess { get; set; } = false;
-        public bool HasPrioritySupport { get; set; } = false;
-        public bool HasChannelManager { get; set; } = false;
-        public bool HasRevenueManagement { get; set; } = false;
-        public bool HasMultiLanguage { get; set; } = false;
-        public bool HasCustomBranding { get; set; } = false;
-        public bool HasDedicatedAccountManager { get; set; } = false;
-        
-        // Trial
-        public int TrialDays { get; set; } = 14;
         
         // Status
         public bool IsActive { get; set; } = true;

@@ -658,7 +658,7 @@ namespace Hotel_SAAS_Backend.API.Data
                 entity.HasIndex(e => e.EndDate);
 
                 entity.HasOne(e => e.Brand)
-                    .WithMany()
+                    .WithMany(b => b.Subscriptions)
                     .HasForeignKey(e => e.BrandId)
                     .OnDelete(DeleteBehavior.Restrict);
 

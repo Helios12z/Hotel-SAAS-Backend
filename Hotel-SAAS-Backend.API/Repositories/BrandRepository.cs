@@ -11,6 +11,8 @@ namespace Hotel_SAAS_Backend.API.Repositories
         {
             return await _dbSet
                 .Include(b => b.Hotels)
+                .Include(b => b.Subscriptions)
+                    .ThenInclude(s => s.Plan)
                 .AsNoTracking()
                 .Where(b => !b.IsDeleted)
                 .ToListAsync();
@@ -20,6 +22,8 @@ namespace Hotel_SAAS_Backend.API.Repositories
         {
             return await _dbSet
                 .Include(b => b.Hotels)
+                .Include(b => b.Subscriptions)
+                    .ThenInclude(s => s.Plan)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(b => b.Id == id && !b.IsDeleted);
         }
